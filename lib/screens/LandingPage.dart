@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timetable/screens/login.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -24,7 +25,7 @@ class LandingPage extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => LandingPage(),
+                      builder: (context) => Login(),
                     ),
                   );
                 },

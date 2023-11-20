@@ -12,8 +12,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sign Saathi',
-      home: TimeTablePage(),
+      title: 'Time Table',
+      home: const LandingPage(),
     );
   }
 }
