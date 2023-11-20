@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timetable/config/strings.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -28,7 +29,7 @@ class LandingPage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Text('dekhte hain', style: TextStyle(fontSize: 24),),
+                child: Text(LandingPageContinueButton, style: TextStyle(fontSize: 24),),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30)
