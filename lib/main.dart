@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/LandingPage.dart';
+import 'screens/TimeTablePage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,4 +17,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

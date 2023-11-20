@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timetable/screens/TimeTablePage.dart';
 import 'dart:convert';
 import '../config/config.dart';
 
@@ -97,7 +98,12 @@ class _LoginState extends State<Login>{
                           width: 150,
                           child: ElevatedButton(
                             onPressed: () {
-
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TimeTablePage(),
+                                ),
+                              );
                               //to be yet implemented
                             },
                             child: Text('Sign in   ->',style: TextStyle(
