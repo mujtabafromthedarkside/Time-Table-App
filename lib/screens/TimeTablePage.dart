@@ -43,23 +43,49 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 decoration: InputDecoration(labelText: 'Enter Venue:', hintText: 'For example, ACB MLH'),
               ),
                 Expanded(
-                  child: MaterialPicker(
-                    pickerColor: currentColor,
-                    onColorChanged: (Color color) {
-                      currentColor = color;
-                    },
-                    enableLabel: true,
+                  child: 
+                //   // MaterialPicker(
+                //   //   pickerColor: currentColor,
+                //   //   onColorChanged: (Color color) {
+                //   //     currentColor = color;
+                //   //   },
+                //   //   enableLabel: true,
+                //   // ),
+                // ),
+
+                  Center(
+                    child: BlockPicker(
+                        pickerColor: currentColor,
+                        onColorChanged: (Color color) {
+                          currentColor = color;
+                        },
+                        availableColors: [
+                          const Color.fromARGB(255, 255, 159, 152), const Color.fromARGB(255, 242, 86, 75), Colors.red, const Color.fromARGB(255, 197, 13, 0), 
+                          const Color.fromARGB(255, 157, 245, 160), const Color.fromARGB(255, 80, 236, 85), const Color.fromARGB(255, 71, 189, 75), Color.fromARGB(255, 28, 138, 31), 
+                          const Color.fromARGB(255, 157, 207, 249), const Color.fromARGB(255, 82, 160, 225), Colors.blue, const Color.fromARGB(255, 11, 108, 188), 
+                          const Color.fromARGB(255, 255, 247, 176), Color.fromARGB(255, 255, 241, 118), const Color.fromARGB(255, 255, 237, 72), Color.fromARGB(255, 255, 230, 0), 
+                          const Color.fromARGB(255, 255, 216, 156), const Color.fromARGB(255, 255, 192, 96), Color.fromARGB(255, 255, 177, 60), Colors.orange, 
+                          const Color.fromARGB(255, 241, 160, 255), const Color.fromARGB(255, 206, 68, 231), const Color.fromARGB(255, 178, 42, 202), Color.fromARGB(255, 159, 1, 187), Color.fromARGB(255, 167, 11, 194), 
+                          Colors.pink,
+                          Colors.teal,
+                          Colors.cyan,
+                          Colors.brown,
+                          Colors.grey,
+                          Colors.black,
+                        ],
+                    ),
                   ),
-                ),
-              //   ColorPicker(
-              //   pickerColor: currentColor,
-              //   onColorChanged: (Color color) {
-              //     currentColor = color;
-              //   },
-              //   enableAlpha: false,
-              //   showLabel: true,
-              //   pickerAreaHeightPercent: 0.8,
-              // ),
+
+                //   ColorPicker(
+                //   pickerColor: currentColor,
+                //   onColorChanged: (Color color) {
+                //     currentColor = color;
+                //   },
+                //   enableAlpha: false,
+                //   showLabel: true,
+                //   pickerAreaHeightPercent: 0.8,
+                // ),
+              ),
             ],
           ),
           actions: [
@@ -94,7 +120,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
     );
   }
 
-  String? selectedOption = 'Option 1';
+  String? selectedBatch = 'Choose your batch';
+  String? selectedFaculty = 'Choose your faculty';
+
     final List<TimetableItem> timetableData = [
     TimetableItem('', Colors.white),
     TimetableItem('8:00 - 8:30', Colors.black12),
@@ -252,6 +280,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                  children: [
                    Container(
+                    constraints: BoxConstraints(
+                      maxWidth: 180,
+                    ),
+                    width: 180,
                     decoration: BoxDecoration(
                       color: Colors.blue, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
@@ -259,10 +291,26 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: DropdownButton<String>(
-                        items: <String>['33', '32', '31', '30', '29'].map((String value) {
+                        selectedItemBuilder: (BuildContext context) {
+                          return <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
+                            // return Center(
+                            //   child: Text(
+                            //     value,
+                            //     // textAlign: TextAlign.center,
+                            //   )
+                            // );
+                            return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
+                          }).toList();
+                        },
+                        items: <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value),
+                            child: Center(
+                              child: Text(
+                                value,
+                                // textAlign: TextAlign.center,
+                              )
+                            ),
                           );
                         }).toList(),
                         // value: selectedOption,
@@ -272,13 +320,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         //   });
 
                         // },
-                        // onChanged: (String? value) => setState(
-                        //     () {
-                        //       selectedOption = value ?? "";
-                        //   }
-                        // ),
-                        onChanged: (_){},
-                        hint: const Text('Choose your batch'),
+                        onChanged: (String? value) => setState(
+                            () {
+                              selectedBatch = value ?? "";
+                          }
+                        ),
+                        value: selectedBatch,
+                        // onChanged: (_){},
+                        // hint: const Text('Choose your batch'),
 
                     
                         icon: const Icon(Icons.arrow_downward), // Custom icon
@@ -292,37 +341,54 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         dropdownColor: Colors.blue,
                       ),
                     ),
-                           ),
+                  ),
              
               Container(
-                decoration: BoxDecoration(
-                  color: Colors.blue, // Set the background color
-                  borderRadius: BorderRadius.circular(30), // Optional: Set border radius
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: DropdownButton<String>(
-                    items: <String>['AI', 'CS', 'ME'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (_) {},
-                    hint: const Text('Choose your faculty'),
-                
-                    icon: const Icon(Icons.arrow_downward), // Custom icon
-                    iconSize: 20, // Set icon size
-                    elevation: 0, // Dropdown menu elevation
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontFamily: 'Roboto',
+                    constraints: BoxConstraints(
+                      maxWidth: 180,
                     ),
-                    dropdownColor: Colors.blue,
+                    width: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.blue, // Set the background color
+                      borderRadius: BorderRadius.circular(30), // Optional: Set border radius
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: DropdownButton<String>(
+                        selectedItemBuilder: (BuildContext context) {
+                          return <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
+                            return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
+                          }).toList();
+                        },
+                        items: <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Center(
+                              child: Text(
+                                value,
+                                // textAlign: TextAlign.center,
+                              )
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? value) => setState(
+                            () {
+                              selectedFaculty = value ?? "";
+                          }
+                        ),
+                        value: selectedFaculty,                    
+                        icon: const Icon(Icons.arrow_downward), // Custom icon
+                        iconSize: 20, // Set icon size
+                        elevation: 0, // Dropdown menu elevation
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontFamily: 'Roboto',
+                        ),
+                        dropdownColor: Colors.blue,
+                      ),
+                    ),
                   ),
-                ),
-                           )
                  ],
                ),
              ),
