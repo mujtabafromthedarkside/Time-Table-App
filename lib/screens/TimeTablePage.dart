@@ -30,18 +30,21 @@ class _TimeTablePageState extends State<TimeTablePage> {
         return AlertDialog(
           backgroundColor: Colors.white,
           title: Text('Enter Details'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: textController1,
-                decoration: InputDecoration(labelText: 'Enter Course:', hintText: 'For example, ES324'),
-              ),
-              SizedBox(height: 10),
-              TextField(
-                controller: textController2,
-                decoration: InputDecoration(labelText: 'Enter Venue:', hintText: 'For example, ACB MLH'),
-              ),
+          content: Container(
+            height: 275,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: textController1,
+                  decoration: InputDecoration(labelText: 'Enter Course:', hintText: 'For example, ES324'),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: textController2,
+                  decoration: InputDecoration(labelText: 'Enter Venue:', hintText: 'For example, ACB MLH'),
+                ),
+                SizedBox(height: 10),
                 Expanded(
                   child: 
                 //   // MaterialPicker(
@@ -52,20 +55,20 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 //   //   enableLabel: true,
                 //   // ),
                 // ),
-
+          
                   Center(
                     child: BlockPicker(
                         pickerColor: currentColor,
                         onColorChanged: (Color color) {
                           currentColor = color;
                         },
-                        availableColors: [
-                          const Color.fromARGB(255, 255, 159, 152), const Color.fromARGB(255, 242, 86, 75), Colors.red, const Color.fromARGB(255, 197, 13, 0), 
-                          const Color.fromARGB(255, 157, 245, 160), const Color.fromARGB(255, 80, 236, 85), const Color.fromARGB(255, 71, 189, 75), Color.fromARGB(255, 28, 138, 31), 
-                          const Color.fromARGB(255, 157, 207, 249), const Color.fromARGB(255, 82, 160, 225), Colors.blue, const Color.fromARGB(255, 11, 108, 188), 
-                          const Color.fromARGB(255, 255, 247, 176), Color.fromARGB(255, 255, 241, 118), const Color.fromARGB(255, 255, 237, 72), Color.fromARGB(255, 255, 230, 0), 
-                          const Color.fromARGB(255, 255, 216, 156), const Color.fromARGB(255, 255, 192, 96), Color.fromARGB(255, 255, 177, 60), Colors.orange, 
-                          const Color.fromARGB(255, 241, 160, 255), const Color.fromARGB(255, 206, 68, 231), const Color.fromARGB(255, 178, 42, 202), Color.fromARGB(255, 159, 1, 187), Color.fromARGB(255, 167, 11, 194), 
+                        availableColors: const [
+                          Color.fromARGB(255, 255, 159, 152), Color.fromARGB(255, 242, 86, 75), Colors.red, Color.fromARGB(255, 197, 13, 0), 
+                          Color.fromARGB(255, 157, 245, 160), Color.fromARGB(255, 80, 236, 85), Color.fromARGB(255, 71, 189, 75), Color.fromARGB(255, 28, 138, 31), 
+                          Color.fromARGB(255, 157, 207, 249), Color.fromARGB(255, 82, 160, 225), Colors.blue, Color.fromARGB(255, 11, 108, 188), 
+                          Color.fromARGB(255, 255, 247, 176), Color.fromARGB(255, 255, 241, 118), Color.fromARGB(255, 255, 237, 72), Color.fromARGB(255, 255, 230, 0), 
+                          Color.fromARGB(255, 255, 216, 156), Color.fromARGB(255, 255, 192, 96), Color.fromARGB(255, 255, 177, 60), Colors.orange, 
+                          Color.fromARGB(255, 241, 160, 255), Color.fromARGB(255, 206, 68, 231), Color.fromARGB(255, 178, 42, 202), Color.fromARGB(255, 159, 1, 187), Color.fromARGB(255, 167, 11, 194), 
                           Colors.pink,
                           Colors.teal,
                           Colors.cyan,
@@ -75,7 +78,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         ],
                     ),
                   ),
-
+          
                 //   ColorPicker(
                 //   pickerColor: currentColor,
                 //   onColorChanged: (Color color) {
@@ -85,8 +88,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 //   showLabel: true,
                 //   pickerAreaHeightPercent: 0.8,
                 // ),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
           actions: [
             ElevatedButton(
@@ -252,6 +256,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
   final int gridRows = 8;
   final int gridColumns = 15;
   bool editButtonPressed = false;
+  bool resizeButtonPressed = false;
+  bool copyButtonPressed = false;
 
   int toRowMajor(int index){
     return index%gridRows * gridColumns + index~/gridRows;
@@ -416,6 +422,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 child: Container(
                   padding: EdgeInsets.all(10),
                   margin: EdgeInsets.all(5),
+                  // color: Colors.blue[200],
+                  color: item.color,
+
                   // child: Text('ES341\nACB MLH'),
                   child: Center(
                     child: Text(
@@ -426,44 +435,110 @@ class _TimeTablePageState extends State<TimeTablePage> {
                       ),
                     ),
                   ),
-                  // color: Colors.blue[200],
-                  color: item.color,
                 ),
               );
             },
           ),
         ),
 
-             Container(
-              // color: Colors.red,
-              margin: EdgeInsets.fromLTRB(0,40,0,20),
-              decoration: BoxDecoration(
-                color: editButtonPressed ? Colors.red : Colors.blue,
-                borderRadius: BorderRadius.circular(30), // Adjust the radius
-              ),
-               child: ElevatedButton(
-                 style: ElevatedButton.styleFrom(
-                   // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                   backgroundColor: editButtonPressed ? Colors.red : Colors.blue,
-                   foregroundColor: Colors.black,
-                   shape: RoundedRectangleBorder(
-                     borderRadius: BorderRadius.circular(30),
+             Row(
+               children: [
+                 Container(
+                  // color: Colors.red,
+                  margin: EdgeInsets.fromLTRB(0,40,0,20),
+                  decoration: BoxDecoration(
+                    color: editButtonPressed ? Colors.red : Colors.blue,
+                    borderRadius: BorderRadius.circular(30), // Adjust the radius
+                  ),
+                   child: ElevatedButton(
+                     style: ElevatedButton.styleFrom(
+                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                       backgroundColor: editButtonPressed ? Colors.red : Colors.blue,
+                       foregroundColor: Colors.black,
+                       shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(30),
+                       ),
+                     ),
+                     onPressed: () {
+                      setState(() {
+                        editButtonPressed = !editButtonPressed;
+                      });
+                     },
+                     child: Text(
+                       editButtonPressed ? "Cancel" : "Edit",
+                       style: TextStyle(
+                         fontSize: 20,
+                         fontFamily: 'Roboto',
+                       ),
+                     ),
                    ),
                  ),
-                 onPressed: () {
-                  setState(() {
-                    editButtonPressed = !editButtonPressed;
-                  });
-                 },
-                 child: Text(
-                   editButtonPressed ? "Cancel" : "Edit",
-                   style: TextStyle(
-                     fontSize: 20,
-                     fontFamily: 'Roboto',
+
+                Container(
+                  // color: Colors.red,
+                  margin: EdgeInsets.fromLTRB(0,40,0,20),
+                  decoration: BoxDecoration(
+                    color: resizeButtonPressed ? Colors.red : Colors.blue,
+                    borderRadius: BorderRadius.circular(30), // Adjust the radius
+                  ),
+                   child: ElevatedButton(
+                     style: ElevatedButton.styleFrom(
+                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                       backgroundColor: resizeButtonPressed ? Colors.red : Colors.blue,
+                       foregroundColor: Colors.black,
+                       shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(30),
+                       ),
+                     ),
+                     onPressed: () {
+                      setState(() {
+                        resizeButtonPressed = !resizeButtonPressed;
+                      });
+                     },
+                     child: Text(
+                       resizeButtonPressed ? "Cancel" : "Edit",
+                       style: TextStyle(
+                         fontSize: 20,
+                         fontFamily: 'Roboto',
+                       ),
+                     ),
                    ),
                  ),
-               ),
+
+                 Container(
+                  // color: Colors.red,
+                  margin: EdgeInsets.fromLTRB(0,40,0,20),
+                  decoration: BoxDecoration(
+                    color: copyButtonPressed ? Colors.red : Colors.blue,
+                    borderRadius: BorderRadius.circular(30), // Adjust the radius
+                  ),
+                   child: ElevatedButton(
+                     style: ElevatedButton.styleFrom(
+                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                       backgroundColor: copyButtonPressed ? Colors.red : Colors.blue,
+                       foregroundColor: Colors.black,
+                       shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(30),
+                       ),
+                     ),
+                     onPressed: () {
+                      setState(() {
+                        copyButtonPressed = !copyButtonPressed;
+                      });
+                     },
+                     child: Text(
+                       copyButtonPressed ? "Cancel" : "Edit",
+                       style: TextStyle(
+                         fontSize: 20,
+                         fontFamily: 'Roboto',
+                       ),
+                     ),
+                   ),
+                 ),
+               ],
              ),
           ],
         ),
