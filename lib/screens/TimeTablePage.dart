@@ -258,6 +258,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
   bool editButtonPressed = false;
   bool resizeButtonPressed = false;
   bool copyButtonPressed = false;
+  int copyIndex = -1;
 
   int toRowMajor(int index){
     return index%gridRows * gridColumns + index~/gridRows;
@@ -412,10 +413,24 @@ class _TimeTablePageState extends State<TimeTablePage> {
               TimetableItem item = timetableData[index];
               return GestureDetector(
                 onTap: () {
-                  if(!editButtonPressed) return;
+                  if(!editButtonPressed && !copyButtonPressed) return;
                   if(index < gridColumns || toColumnMajor(index) < gridRows) return;
                   setState(() {
-                    _showTextInputDialog(context, item);
+                    if(copyButtonPressed){
+                      if(copyIndex == -1){
+                        copyIndex = index;
+                        print('copied $index');
+                      } else{
+                        // item = timetableData[copyIndex];
+                        item.text = timetableData[copyIndex].text;
+                        item.color = timetableData[copyIndex].color;
+
+                        print('pasted $copyIndex to $index');
+                      }
+                    }
+                    else if(editButtonPressed){
+                      _showTextInputDialog(context, item);
+                    }
                     // timetableData[index].color = Colors.red;
                   });
                 },
@@ -442,6 +457,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
         ),
 
              Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                children: [
                  Container(
                   // color: Colors.red,
@@ -462,7 +478,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
                      ),
                      onPressed: () {
                       setState(() {
-                        editButtonPressed = !editButtonPressed;
+                        if(copyButtonPressed || resizeButtonPressed){}
+                        else{
+                          editButtonPressed = !editButtonPressed;
+                        }
                       });
                      },
                      child: Text(
@@ -494,11 +513,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
                      ),
                      onPressed: () {
                       setState(() {
-                        resizeButtonPressed = !resizeButtonPressed;
+                        if(copyButtonPressed || editButtonPressed){}
+                        else {
+                          resizeButtonPressed = !resizeButtonPressed; 
+                        }
                       });
                      },
                      child: Text(
-                       resizeButtonPressed ? "Cancel" : "Edit",
+                       resizeButtonPressed ? "Cancel" : "Resize",
                        style: TextStyle(
                          fontSize: 20,
                          fontFamily: 'Roboto',
@@ -526,11 +548,19 @@ class _TimeTablePageState extends State<TimeTablePage> {
                      ),
                      onPressed: () {
                       setState(() {
-                        copyButtonPressed = !copyButtonPressed;
+                        print("copy button pressed");
+                        print("$editButtonPressed $resizeButtonPressed $copyButtonPressed");
+                        if(editButtonPressed || resizeButtonPressed){}
+                        else {
+                          copyButtonPressed = !copyButtonPressed;
+                          if(copyButtonPressed == false){
+                            copyIndex = -1;
+                          }
+                        }
                       });
                      },
                      child: Text(
-                       copyButtonPressed ? "Cancel" : "Edit",
+                       copyButtonPressed ? "Cancel" : "Copy",
                        style: TextStyle(
                          fontSize: 20,
                          fontFamily: 'Roboto',
