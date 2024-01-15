@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-double TimeAxisUnitLength = 100;
+double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 65;
 
 double TimeAxisBreadth = 60;
@@ -14,31 +14,25 @@ double TimeAxisUnitTime = 30;
 
 Color DefaultGridColor = Color.fromARGB(255, 239, 173, 173);
 
-class TimetableItem {
-  String text;
-  Color? color;
+Color getRandomColor() {
+  Random random = Random();
+  return Color.fromRGBO(
+    random.nextInt(256),
+    random.nextInt(256),
+    random.nextInt(256),
+    1.0,
+  );
+}
 
+class TimetableItem {
   TimetableItem(this.text, this.color);
+
+  Color? color;
+  String text;
 }
 
 class TimetableSlot {
-  late int startTime;
-  late int endTime;
-  late int dayNumber;
-  late double length;
-
-  late String startTimeString;
-  late String endTimeString;
-  late String dayString;
-
-  String course = "";
-  String venue = "";
-  String notes = "";
-
-  Color? color = DefaultGridColor;
-
-  TimetableSlot.FromStrings(this.startTimeString, this.endTimeString,
-      this.dayString, this.course, this.venue, this.notes, this.color) {
+  TimetableSlot.FromStrings(this.startTimeString, this.endTimeString, this.dayString, this.course, this.venue, this.notes, this.color) {
     int startHours = int.parse(startTimeString.split(":")[0]);
     int startMinutes = int.parse(startTimeString.split(":")[1]);
 
@@ -50,24 +44,45 @@ class TimetableSlot {
 
     this.dayNumber = ["Mon", "Tue", "Wed", "Thu", "Fri"].indexOf(dayString);
     // FOR FUTURE, raise error if dayString not in ["Mon", "Tue", "Wed", "Thu", "Fri"]
-    this.length =
-        (this.endTime - this.startTime) / TimeAxisUnitTime * TimeAxisUnitLength;
+    this.length = (this.endTime - this.startTime) / TimeAxisUnitTime * TimeAxisUnitLength;
   }
 
   TimetableSlot.FromValues(this.startTime, this.endTime, this.dayNumber) {
     // time ratio * unit length
-    this.length =
-        (this.endTime - this.startTime) / TimeAxisUnitTime * TimeAxisUnitLength;
+    this.calculateLength();
+  }
+
+  // Color? color = DefaultGridColor;
+  Color? color = getRandomColor();
+
+  String course = "";
+  late int dayNumber;
+  late String dayString = ""; // empty container has empty strings
+  late int endTime;
+  late String endTimeString;
+  late double length;
+  String notes = "";
+  late int startTime;
+  late String startTimeString;
+  String venue = "";
+
+  void updateEndTime(int newEndTime) {
+    this.endTime = newEndTime;
+    this.calculateLength();
+  }
+
+  void calculateLength() {
+    this.length = (this.endTime - this.startTime) / TimeAxisUnitTime * TimeAxisUnitLength;
   }
 }
 
 class TimetableItem2 {
-  String text;
+  TimetableItem2(this.text, this.color, this.size, this.idx);
+
   Color? color;
   int idx;
   int size;
-
-  TimetableItem2(this.text, this.color, this.size, this.idx);
+  String text;
 }
 
 class TimeTablePage extends StatefulWidget {
@@ -78,144 +93,23 @@ class TimeTablePage extends StatefulWidget {
 }
 
 class _TimeTablePageState extends State<TimeTablePage> {
-  Future<void> _showTextInputDialog(
-      BuildContext context, TimetableItem item) async {
-    TextEditingController textController1 = TextEditingController();
-    textController1.text = item.text.split("\n")[0];
-    TextEditingController textController2 = TextEditingController();
-    textController2.text =
-        item.text.split("\n").length > 1 ? item.text.split("\n")[1] : "";
-    Color currentColor = Color(0xFF123123); // Initial color
+  final List<TimetableSlot> ContainersToPrint = [];
+  final List<TimetableSlot> TimetableSlots = [
+    // TimetableSlot.FromStrings("10:00", "11:00", "Mon", "ES341", "ACB MLH", "", Colors.red),
+    TimetableSlot.FromStrings("8:00", "11:00", "Mon", "ES341", "ACB MLH GroundFLOOR like it or not", "", Colors.red),
+    TimetableSlot.FromStrings("8:00", "11:00", "Fri", "ES341", "ACB MLH", "", Colors.red),
+    TimetableSlot.FromStrings("10:00", "11:00", "Tue", "CS324", "ACB LH2", "", Colors.blue),
+    TimetableSlot.FromStrings("12:00", "13:00", "Wed", "CS311", "ACB LH5", "", Colors.orange),
+    TimetableSlot.FromStrings("8:00", "9:00", "Thu", "ES304", "ACB LH6", "", Colors.purple),
+  ];
 
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text('Enter Details'),
-          content: Container(
-            height: 275,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: textController1,
-                  decoration: InputDecoration(
-                      labelText: 'Enter Course:',
-                      hintText: 'For example, ES324'),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: textController2,
-                  decoration: InputDecoration(
-                      labelText: 'Enter Venue:',
-                      hintText: 'For example, ACB MLH'),
-                ),
-                SizedBox(height: 10),
-                Expanded(
-                  child:
-                      //   // MaterialPicker(
-                      //   //   pickerColor: currentColor,
-                      //   //   onColorChanged: (Color color) {
-                      //   //     currentColor = color;
-                      //   //   },
-                      //   //   enableLabel: true,
-                      //   // ),
-                      // ),
-
-                      Center(
-                    child: BlockPicker(
-                      pickerColor: currentColor,
-                      onColorChanged: (Color color) {
-                        currentColor = color;
-                      },
-                      availableColors: const [
-                        Color.fromARGB(255, 255, 159, 152),
-                        Color.fromARGB(255, 242, 86, 75),
-                        Colors.red,
-                        Color.fromARGB(255, 197, 13, 0),
-                        Color.fromARGB(255, 157, 245, 160),
-                        Color.fromARGB(255, 80, 236, 85),
-                        Color.fromARGB(255, 71, 189, 75),
-                        Color.fromARGB(255, 28, 138, 31),
-                        Color.fromARGB(255, 157, 207, 249),
-                        Color.fromARGB(255, 82, 160, 225),
-                        Colors.blue,
-                        Color.fromARGB(255, 11, 108, 188),
-                        Color.fromARGB(255, 255, 247, 176),
-                        Color.fromARGB(255, 255, 241, 118),
-                        Color.fromARGB(255, 255, 237, 72),
-                        Color.fromARGB(255, 255, 230, 0),
-                        Color.fromARGB(255, 255, 216, 156),
-                        Color.fromARGB(255, 255, 192, 96),
-                        Color.fromARGB(255, 255, 177, 60),
-                        Colors.orange,
-                        Color.fromARGB(255, 241, 160, 255),
-                        Color.fromARGB(255, 206, 68, 231),
-                        Color.fromARGB(255, 178, 42, 202),
-                        Color.fromARGB(255, 159, 1, 187),
-                        Color.fromARGB(255, 167, 11, 194),
-                        Colors.pink,
-                        Colors.teal,
-                        Colors.cyan,
-                        Colors.brown,
-                        Colors.grey,
-                        Colors.black,
-                      ],
-                    ),
-                  ),
-
-                  //   ColorPicker(
-                  //   pickerColor: currentColor,
-                  //   onColorChanged: (Color color) {
-                  //     currentColor = color;
-                  //   },
-                  //   enableAlpha: false,
-                  //   showLabel: true,
-                  //   pickerAreaHeightPercent: 0.8,
-                  // ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                // close the dialog
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Handle the input and close the dialog
-                setState(() {
-                  // don't add \n if venue empty, to keep text vertically centered
-                  item.text = textController1.text.toUpperCase() +
-                      (textController2.text == ""
-                          ? ""
-                          : "\n" + textController2.text.toUpperCase());
-
-                  // if user selected a color
-                  if (currentColor != Color(0xFF123123)) {
-                    item.color = currentColor;
-                  }
-                });
-                print('Typed text 1: ${textController1.text}');
-                print('Typed text 2: ${textController2.text}');
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  String? selectedBatch = 'Choose your batch';
-  String? selectedFaculty = 'Choose your faculty';
-
+  bool addButtonPressed = false;
+  int copyIndex = -1;
+  final List<String> daysAxis = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  bool deleteButtonPressed = false;
+  bool editButtonPressed = false;
+  final int gridColumns = 15;
+  final int gridRows = 8;
   final List<TimetableItem2> overlayData = [
     TimetableItem2('wow', Colors.blue, 2, 2),
     TimetableItem2('wow', Colors.red, 2, 2),
@@ -223,7 +117,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
   ];
 
   final List<int> overlayIndices = [2, 5, 7];
-
+  String? selectedBatch = 'Choose your batch';
+  String? selectedFaculty = 'Choose your faculty';
+  final List<String> texts = ['Text 1', 'Text 2'];
+  final List<String> timeAxis = [];
   final List<TimetableItem> timetableData = [
     TimetableItem('', Colors.white),
     TimetableItem('8:00 - 8:30', Colors.black12),
@@ -350,51 +247,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
     // Add more items as needed
   ];
 
-  final int gridRows = 8;
-  final int gridColumns = 15;
-  bool editButtonPressed = false;
-  bool resizeButtonPressed = false;
-  bool copyButtonPressed = false;
-  int copyIndex = -1;
-
-  int toRowMajor(int index) {
-    return index % gridRows * gridColumns + index ~/ gridRows;
-    // rows passed * rows + columns passed
-  }
-
-  int toColumnMajor(int index) {
-    return index % gridColumns * gridRows + index ~/ gridColumns;
-    // columns passed * rows + rows passed
-  }
-
-  final List<String> texts = ['Text 1', 'Text 2'];
-  final List<String> daysAxis = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-  final List<String> timeAxis = [];
-  final List<TimetableSlot> ContainersToPrint = [];
-  final List<TimetableSlot> TimetableSlots = [
-    // TimetableSlot.FromStrings("10:00", "11:00", "Mon", "ES341", "ACB MLH", "", Colors.red),
-    TimetableSlot.FromStrings("8:00", "11:00", "Mon", "ES341",
-        "ACB MLH GroundFLOOR like it or not", "", Colors.red),
-    TimetableSlot.FromStrings(
-        "8:00", "11:00", "Fri", "ES341", "ACB MLH", "", Colors.red),
-    TimetableSlot.FromStrings(
-        "10:00", "11:00", "Tue", "CS324", "ACB LH2", "", Colors.blue),
-    TimetableSlot.FromStrings(
-        "12:00", "13:00", "Wed", "CS311", "ACB LH5", "", Colors.orange),
-    TimetableSlot.FromStrings(
-        "8:00", "9:00", "Thu", "ES304", "ACB LH6", "", Colors.purple),
-  ];
-
-  Color getRandomColor() {
-    Random random = Random();
-    return Color.fromRGBO(
-      random.nextInt(256),
-      random.nextInt(256),
-      random.nextInt(256),
-      1.0,
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -419,8 +271,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
       if (TimetableSlots[i].dayNumber == TimetableSlots[i + 1].dayNumber) {
         // CHECK HOW IT LOOKS WHEN BOTH ARE EQUAL BELOW
         if (TimetableSlots[i].endTime > TimetableSlots[i + 1].startTime) {
-          print(
-              "CLASH: slots ${TimetableSlots[i].course} and ${TimetableSlots[i + 1].course}  on day ${TimetableSlots[i].dayString}.");
+          print("CLASH: slots ${TimetableSlots[i].course} and ${TimetableSlots[i + 1].course}  on day ${TimetableSlots[i].dayString}.");
         }
       }
     }
@@ -433,11 +284,146 @@ class _TimeTablePageState extends State<TimeTablePage> {
         currentDay = TimetableSlots[i].dayNumber;
       }
 
-      ContainersToPrint.add(TimetableSlot.FromValues(currentTime,
-          TimetableSlots[i].startTime, TimetableSlots[i].dayNumber));
+      ContainersToPrint.add(TimetableSlot.FromValues(currentTime, TimetableSlots[i].startTime, TimetableSlots[i].dayNumber));
       ContainersToPrint.add(TimetableSlots[i]);
       currentTime = TimetableSlots[i].endTime;
     }
+  }
+
+  int toRowMajor(int index) {
+    return index % gridRows * gridColumns + index ~/ gridRows;
+    // rows passed * rows + columns passed
+  }
+
+  int toColumnMajor(int index) {
+    return index % gridColumns * gridRows + index ~/ gridColumns;
+    // columns passed * rows + rows passed
+  }
+
+  Future<void> _showTextInputDialog(BuildContext context, TimetableItem item) async {
+    TextEditingController textController1 = TextEditingController();
+    textController1.text = item.text.split("\n")[0];
+    TextEditingController textController2 = TextEditingController();
+    textController2.text = item.text.split("\n").length > 1 ? item.text.split("\n")[1] : "";
+    Color currentColor = Color(0xFF123123); // Initial color
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text('Enter Details'),
+          content: Container(
+            height: 275,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: textController1,
+                  decoration: InputDecoration(labelText: 'Enter Course:', hintText: 'For example, ES324'),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: textController2,
+                  decoration: InputDecoration(labelText: 'Enter Venue:', hintText: 'For example, ACB MLH'),
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child:
+                      //   // MaterialPicker(
+                      //   //   pickerColor: currentColor,
+                      //   //   onColorChanged: (Color color) {
+                      //   //     currentColor = color;
+                      //   //   },
+                      //   //   enableLabel: true,
+                      //   // ),
+                      // ),
+
+                      Center(
+                    child: BlockPicker(
+                      pickerColor: currentColor,
+                      onColorChanged: (Color color) {
+                        currentColor = color;
+                      },
+                      availableColors: const [
+                        Color.fromARGB(255, 255, 159, 152),
+                        Color.fromARGB(255, 242, 86, 75),
+                        Colors.red,
+                        Color.fromARGB(255, 197, 13, 0),
+                        Color.fromARGB(255, 157, 245, 160),
+                        Color.fromARGB(255, 80, 236, 85),
+                        Color.fromARGB(255, 71, 189, 75),
+                        Color.fromARGB(255, 28, 138, 31),
+                        Color.fromARGB(255, 157, 207, 249),
+                        Color.fromARGB(255, 82, 160, 225),
+                        Colors.blue,
+                        Color.fromARGB(255, 11, 108, 188),
+                        Color.fromARGB(255, 255, 247, 176),
+                        Color.fromARGB(255, 255, 241, 118),
+                        Color.fromARGB(255, 255, 237, 72),
+                        Color.fromARGB(255, 255, 230, 0),
+                        Color.fromARGB(255, 255, 216, 156),
+                        Color.fromARGB(255, 255, 192, 96),
+                        Color.fromARGB(255, 255, 177, 60),
+                        Colors.orange,
+                        Color.fromARGB(255, 241, 160, 255),
+                        Color.fromARGB(255, 206, 68, 231),
+                        Color.fromARGB(255, 178, 42, 202),
+                        Color.fromARGB(255, 159, 1, 187),
+                        Color.fromARGB(255, 167, 11, 194),
+                        Colors.pink,
+                        Colors.teal,
+                        Colors.cyan,
+                        Colors.brown,
+                        Colors.grey,
+                        Colors.black,
+                      ],
+                    ),
+                  ),
+
+                  //   ColorPicker(
+                  //   pickerColor: currentColor,
+                  //   onColorChanged: (Color color) {
+                  //     currentColor = color;
+                  //   },
+                  //   enableAlpha: false,
+                  //   showLabel: true,
+                  //   pickerAreaHeightPercent: 0.8,
+                  // ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                // close the dialog
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Handle the input and close the dialog
+                setState(() {
+                  // don't add \n if venue empty, to keep text vertically centered
+                  item.text = textController1.text.toUpperCase() + (textController2.text == "" ? "" : "\n" + textController2.text.toUpperCase());
+
+                  // if user selected a color
+                  if (currentColor != Color(0xFF123123)) {
+                    item.color = currentColor;
+                  }
+                });
+                print('Typed text 1: ${textController1.text}');
+                print('Typed text 2: ${textController2.text}');
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -463,43 +449,23 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     width: 180,
                     decoration: BoxDecoration(
                       color: Colors.blue, // Set the background color
-                      borderRadius: BorderRadius.circular(
-                          30), // Optional: Set border radius
+                      borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: DropdownButton<String>(
                         selectedItemBuilder: (BuildContext context) {
-                          return <String>[
-                            'Choose your batch',
-                            '33',
-                            '32',
-                            '31',
-                            '30',
-                            '29'
-                          ].map((String value) {
+                          return <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
                             // return Center(
                             //   child: Text(
                             //     value,
                             //     // textAlign: TextAlign.center,
                             //   )
                             // );
-                            return SizedBox(
-                                width: 152,
-                                child: Center(
-                                    child: Text(value,
-                                        style:
-                                            TextStyle(color: Colors.black))));
+                            return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
                           }).toList();
                         },
-                        items: <String>[
-                          'Choose your batch',
-                          '33',
-                          '32',
-                          '31',
-                          '30',
-                          '29'
-                        ].map((String value) {
+                        items: <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Center(
@@ -542,29 +508,17 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     width: 180,
                     decoration: BoxDecoration(
                       color: Colors.blue, // Set the background color
-                      borderRadius: BorderRadius.circular(
-                          30), // Optional: Set border radius
+                      borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: DropdownButton<String>(
                         selectedItemBuilder: (BuildContext context) {
-                          return <String>[
-                            'Choose your faculty',
-                            'AI',
-                            'CS',
-                            'ME'
-                          ].map((String value) {
-                            return SizedBox(
-                                width: 152,
-                                child: Center(
-                                    child: Text(value,
-                                        style:
-                                            TextStyle(color: Colors.black))));
+                          return <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
+                            return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
                           }).toList();
                         },
-                        items: <String>['Choose your faculty', 'AI', 'CS', 'ME']
-                            .map((String value) {
+                        items: <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Center(
@@ -599,8 +553,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment
-                              .start, // Align horizontally to the start (left)
+                          crossAxisAlignment: CrossAxisAlignment.start, // Align horizontally to the start (left)
                           children: [
                             // DAY AXIS
                             Row(
@@ -611,12 +564,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                   width: TimeAxisBreadth,
                                   color: getRandomColor(),
                                 ),
-                                for (int i = 0; i < daysAxis.length; i++)
-                                  Container(
-                                      height: DayAxisBreadth,
-                                      width: DayAxisUnitLength,
-                                      color: getRandomColor(),
-                                      child: Center(child: Text(daysAxis[i]))),
+                                for (int i = 0; i < daysAxis.length; i++) Container(height: DayAxisBreadth, width: DayAxisUnitLength, color: getRandomColor(), child: Center(child: Text(daysAxis[i]))),
                               ],
                             ),
 
@@ -628,107 +576,84 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                 Column(
                                   children: [
                                     for (int i = 0; i < timeAxis.length; i++)
-                                      Container(
-                                          width: TimeAxisBreadth,
-                                          height: TimeAxisUnitLength,
-                                          color: getRandomColor(),
-                                          child:
-                                              Center(child: Text(timeAxis[i]))),
+                                      Container(width: TimeAxisBreadth, height: TimeAxisUnitLength, color: getRandomColor(), child: Center(child: Text(timeAxis[i]))),
                                   ],
                                 ),
 
                                 // Class Slots (Row of columns of days)
                                 Container(
-                                  width:
-                                      DayAxisUnitLength * (daysAxis.length * 1),
-                                  height: TimeAxisUnitLength *
-                                      (timeAxis.length * 1),
+                                  width: DayAxisUnitLength * (daysAxis.length * 1),
+                                  height: TimeAxisUnitLength * (timeAxis.length * 1),
                                   color: getRandomColor(),
                                   child: Row(
                                     children: [
-                                      for (int dayNumber = 0;
-                                          dayNumber < 5;
-                                          dayNumber++)
+                                      for (int dayNumber = 0; dayNumber < 5; dayNumber++)
                                         Container(
                                           width: DayAxisUnitLength,
-                                          height: TimeAxisUnitLength *
-                                              (timeAxis.length * 1),
+                                          height: TimeAxisUnitLength * (timeAxis.length * 1),
                                           color: DefaultGridColor,
                                           child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              for (int containerNumber = 0;
-                                                  containerNumber <
-                                                      ContainersToPrint.length;
-                                                  containerNumber++)
-                                                if (ContainersToPrint[
-                                                            containerNumber]
-                                                        .dayNumber ==
-                                                    dayNumber)
-                                                  Container(
-                                                    padding: EdgeInsets.all(5),
-                                                    width: DayAxisUnitLength,
-                                                    height: ContainersToPrint[
-                                                            containerNumber]
-                                                        .length,
-                                                    color: ContainersToPrint[
-                                                            containerNumber]
-                                                        .color,
-                                                    child: Align(
-                                                      alignment: Alignment.center,        // vertical align
-                                                      child: RichText(
-                                                        textAlign: TextAlign.center,      // horizontal align
-                                                        text: TextSpan(
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontFamily: 'Roboto',
-                                                            color: Colors.black,
-                                                            decoration: TextDecoration.none,
-                                                          ),
-                                                          children: <TextSpan>[
-                                                            TextSpan(
-                                                                text: ContainersToPrint[
-                                                                        containerNumber]
-                                                                    .course,
+                                              for (int containerNumber = 0; containerNumber < ContainersToPrint.length; containerNumber++)
+                                                if (ContainersToPrint[containerNumber].dayNumber == dayNumber)
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      if (ContainersToPrint[containerNumber].dayString == "") return;
+                                                      if (deleteButtonPressed) {
+                                                        setState(() {
+                                                          ContainersToPrint[containerNumber - 1].updateEndTime(ContainersToPrint[containerNumber].endTime);
+                                                          ContainersToPrint.remove(ContainersToPrint[containerNumber]);
+                                                        });
+                                                      }
+                                                    },
+                                                    child: Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      width: DayAxisUnitLength,
+                                                      height: ContainersToPrint[containerNumber].length,
+                                                      color: ContainersToPrint[containerNumber].color,
+                                                      child: Align(
+                                                        alignment: Alignment.center, // vertical align
+                                                        child: RichText(
+                                                          textAlign: TextAlign.center, // horizontal align
+                                                          text: TextSpan(
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontFamily: 'Roboto',
+                                                              color: Colors.black,
+                                                              decoration: TextDecoration.none,
+                                                            ),
+                                                            children: <TextSpan>[
+                                                              TextSpan(
+                                                                  text: ContainersToPrint[containerNumber].course,
+                                                                  style: TextStyle(
+                                                                    fontWeight: FontWeight.bold,
+                                                                  )),
+                                                              TextSpan(
+                                                                text: '\n',
                                                                 style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                )
-                                                              ),
-                                                            TextSpan(
-                                                              text: '\n',
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .normal,
+                                                                  fontWeight: FontWeight.normal,
                                                                 ),
-                                                            ),
-                                                            TextSpan(
-                                                              text: ContainersToPrint[
-                                                                      containerNumber]
-                                                                  .venue,
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .normal,
-                                                                  fontSize: 16),
-                                                            ),
-                                                          ],
+                                                              ),
+                                                              TextSpan(
+                                                                text: ContainersToPrint[containerNumber].venue,
+                                                                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16),
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
 
-                                                    // Center(
-                                                    //   child: Text(ContainersToPrint[
-                                                    //               containerNumber]
-                                                    //           .course +
-                                                    //       "\n" +
-                                                    //       ContainersToPrint[
-                                                    //               containerNumber]
-                                                    //           .venue),
-                                                    // ),
+                                                      // Center(
+                                                      //   child: Text(ContainersToPrint[
+                                                      //               containerNumber]
+                                                      //           .course +
+                                                      //       "\n" +
+                                                      //       ContainersToPrint[
+                                                      //               containerNumber]
+                                                      //           .venue),
+                                                      // ),
+                                                    ),
                                                   ),
                                             ],
                                           ),
@@ -747,17 +672,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   // color: Colors.red,
                   margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
                   decoration: BoxDecoration(
-                    color: editButtonPressed ? Colors.red : Colors.blue,
-                    borderRadius:
-                        BorderRadius.circular(30), // Adjust the radius
+                    color: addButtonPressed ? Colors.red : Colors.blue,
+                    borderRadius: BorderRadius.circular(30), // Adjust the radius
                   ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor:
-                          editButtonPressed ? Colors.red : Colors.blue,
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      backgroundColor: addButtonPressed ? Colors.red : Colors.blue,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -765,7 +687,41 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     ),
                     onPressed: () {
                       setState(() {
-                        if (copyButtonPressed || resizeButtonPressed) {
+                        if (deleteButtonPressed || editButtonPressed) {
+                        } else {
+                          addButtonPressed = !addButtonPressed;
+                        }
+                      });
+                    },
+                    child: Text(
+                      addButtonPressed ? "Cancel" : "Add",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  // color: Colors.red,
+                  margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
+                  decoration: BoxDecoration(
+                    color: editButtonPressed ? Colors.red : Colors.blue,
+                    borderRadius: BorderRadius.circular(30), // Adjust the radius
+                  ),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      backgroundColor: editButtonPressed ? Colors.red : Colors.blue,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        if (deleteButtonPressed || addButtonPressed) {
                         } else {
                           editButtonPressed = !editButtonPressed;
                         }
@@ -784,17 +740,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   // color: Colors.red,
                   margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
                   decoration: BoxDecoration(
-                    color: resizeButtonPressed ? Colors.red : Colors.blue,
-                    borderRadius:
-                        BorderRadius.circular(30), // Adjust the radius
+                    color: deleteButtonPressed ? Colors.red : Colors.blue,
+                    borderRadius: BorderRadius.circular(30), // Adjust the radius
                   ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor:
-                          resizeButtonPressed ? Colors.red : Colors.blue,
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      backgroundColor: deleteButtonPressed ? Colors.red : Colors.blue,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -802,56 +755,18 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     ),
                     onPressed: () {
                       setState(() {
-                        if (copyButtonPressed || editButtonPressed) {
+                        print("$addButtonPressed $editButtonPressed $deleteButtonPressed");
+                        if (addButtonPressed || editButtonPressed) {
                         } else {
-                          resizeButtonPressed = !resizeButtonPressed;
-                        }
-                      });
-                    },
-                    child: Text(
-                      resizeButtonPressed ? "Cancel" : "Resize",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  // color: Colors.red,
-                  margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
-                  decoration: BoxDecoration(
-                    color: copyButtonPressed ? Colors.red : Colors.blue,
-                    borderRadius:
-                        BorderRadius.circular(30), // Adjust the radius
-                  ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor:
-                          copyButtonPressed ? Colors.red : Colors.blue,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        print(
-                            "$editButtonPressed $resizeButtonPressed $copyButtonPressed");
-                        if (editButtonPressed || resizeButtonPressed) {
-                        } else {
-                          copyButtonPressed = !copyButtonPressed;
-                          if (copyButtonPressed == false) {
+                          deleteButtonPressed = !deleteButtonPressed;
+                          if (deleteButtonPressed == false) {
                             copyIndex = -1;
                           }
                         }
                       });
                     },
                     child: Text(
-                      copyButtonPressed ? "Cancel" : "Copy",
+                      deleteButtonPressed ? "Cancel" : "Delete",
                       style: TextStyle(
                         fontSize: 20,
                         fontFamily: 'Roboto',
