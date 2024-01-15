@@ -373,8 +373,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
   final List<TimetableSlot> ContainersToPrint = [];
   final List<TimetableSlot> TimetableSlots = [
     // TimetableSlot.FromStrings("10:00", "11:00", "Mon", "ES341", "ACB MLH", "", Colors.red),
-    TimetableSlot.FromStrings(
-        "8:00", "11:00", "Mon", "ES341", "ACB MLH Ground", "", Colors.red),
+    TimetableSlot.FromStrings("8:00", "11:00", "Mon", "ES341",
+        "ACB MLH GroundFLOOR like it or not", "", Colors.red),
     TimetableSlot.FromStrings(
         "8:00", "11:00", "Fri", "ES341", "ACB MLH", "", Colors.red),
     TimetableSlot.FromStrings(
@@ -419,25 +419,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
       if (TimetableSlots[i].dayNumber == TimetableSlots[i + 1].dayNumber) {
         // CHECK HOW IT LOOKS WHEN BOTH ARE EQUAL BELOW
         if (TimetableSlots[i].endTime > TimetableSlots[i + 1].startTime) {
-          print("ERROR: TimetableSlots not sorted properly");
-          // showDialog(
-          //   context: context,
-          //   builder: (BuildContext context) {
-          //     return AlertDialog(
-          //       title: Text('CLASH OF TIMINGS'),
-          //       content:
-          //           Text('Warning: Clash detected. Class doesn\'t end before another starts.'),
-          //       actions: <Widget>[
-          //         TextButton(
-          //           onPressed: () {
-          //             Navigator.of(context).pop(); // Close the dialog
-          //           },
-          //           child: Text('OK'),
-          //         ),
-          //       ],
-          //     );
-          //   },
-          // );
+          print(
+              "CLASH: slots ${TimetableSlots[i].course} and ${TimetableSlots[i + 1].course}  on day ${TimetableSlots[i].dayString}.");
         }
       }
     }
@@ -684,6 +667,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                         .dayNumber ==
                                                     dayNumber)
                                                   Container(
+                                                    padding: EdgeInsets.all(5),
                                                     width: DayAxisUnitLength,
                                                     height: ContainersToPrint[
                                                             containerNumber]
@@ -691,15 +675,60 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                     color: ContainersToPrint[
                                                             containerNumber]
                                                         .color,
-                                                    child: Center(
-                                                      child: Text(ContainersToPrint[
-                                                                  containerNumber]
-                                                              .course +
-                                                          "\n" +
-                                                          ContainersToPrint[
-                                                                  containerNumber]
-                                                              .venue),
+                                                    child: Align(
+                                                      alignment: Alignment.center,        // vertical align
+                                                      child: RichText(
+                                                        textAlign: TextAlign.center,      // horizontal align
+                                                        text: TextSpan(
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontFamily: 'Roboto',
+                                                            color: Colors.black,
+                                                            decoration: TextDecoration.none,
+                                                          ),
+                                                          children: <TextSpan>[
+                                                            TextSpan(
+                                                                text: ContainersToPrint[
+                                                                        containerNumber]
+                                                                    .course,
+                                                                style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                )
+                                                              ),
+                                                            TextSpan(
+                                                              text: '\n',
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .normal,
+                                                                ),
+                                                            ),
+                                                            TextSpan(
+                                                              text: ContainersToPrint[
+                                                                      containerNumber]
+                                                                  .venue,
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .normal,
+                                                                  fontSize: 16),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
                                                     ),
+
+                                                    // Center(
+                                                    //   child: Text(ContainersToPrint[
+                                                    //               containerNumber]
+                                                    //           .course +
+                                                    //       "\n" +
+                                                    //       ContainersToPrint[
+                                                    //               containerNumber]
+                                                    //           .venue),
+                                                    // ),
                                                   ),
                                             ],
                                           ),
