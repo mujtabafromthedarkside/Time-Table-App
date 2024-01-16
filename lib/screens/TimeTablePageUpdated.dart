@@ -13,6 +13,7 @@ double DayAxisBreadth = 100;
 double TimeAxisUnitTime = 30;
 
 Color DefaultGridColor = Color.fromARGB(255, 239, 173, 173);
+Color DefaultSlotColor = Color.fromARGB(255, 61, 103, 219);
 
 Color getRandomColor() {
   Random random = Random();
@@ -24,27 +25,13 @@ Color getRandomColor() {
   );
 }
 
-class TimetableItem {
-  TimetableItem(this.text, this.color);
-
-  Color? color;
-  String text;
-}
-
 class TimetableSlot {
+  TimetableSlot.Empty() {
+    this.color = DefaultSlotColor;
+  }
+
   TimetableSlot.FromStrings(this.startTimeString, this.endTimeString, this.dayString, this.course, this.venue, this.notes, this.color) {
-    int startHours = int.parse(startTimeString.split(":")[0]);
-    int startMinutes = int.parse(startTimeString.split(":")[1]);
-
-    int endHours = int.parse(endTimeString.split(":")[0]);
-    int endMinutes = int.parse(endTimeString.split(":")[1]);
-
-    this.startTime = startHours * 60 + startMinutes;
-    this.endTime = endHours * 60 + endMinutes;
-
-    this.dayNumber = ["Mon", "Tue", "Wed", "Thu", "Fri"].indexOf(dayString);
-    // FOR FUTURE, raise error if dayString not in ["Mon", "Tue", "Wed", "Thu", "Fri"]
-    this.length = (this.endTime - this.startTime) / TimeAxisUnitTime * TimeAxisUnitLength;
+    this.calculateValues();
   }
 
   TimetableSlot.FromValues(this.startTime, this.endTime, this.dayNumber) {
@@ -53,18 +40,20 @@ class TimetableSlot {
   }
 
   // Color? color = DefaultGridColor;
-  Color? color = getRandomColor();
+  late int startTime;
+  late int endTime;
+  late int dayNumber;
+
+  String dayString = ""; // empty container has empty strings
+  String endTimeString = "";
+  String startTimeString = "";
 
   String course = "";
-  late int dayNumber;
-  late String dayString = ""; // empty container has empty strings
-  late int endTime;
-  late String endTimeString;
-  late double length;
-  String notes = "";
-  late int startTime;
-  late String startTimeString;
   String venue = "";
+  String notes = "";
+
+  Color? color = getRandomColor();
+  late double length;
 
   void updateEndTime(int newEndTime) {
     this.endTime = newEndTime;
@@ -74,15 +63,21 @@ class TimetableSlot {
   void calculateLength() {
     this.length = (this.endTime - this.startTime) / TimeAxisUnitTime * TimeAxisUnitLength;
   }
-}
 
-class TimetableItem2 {
-  TimetableItem2(this.text, this.color, this.size, this.idx);
+  void calculateValues() {
+    int startHours = int.parse(startTimeString.split(":")[0]);
+    int startMinutes = int.parse(startTimeString.split(":")[1]);
 
-  Color? color;
-  int idx;
-  int size;
-  String text;
+    int endHours = int.parse(endTimeString.split(":")[0]);
+    int endMinutes = int.parse(endTimeString.split(":")[1]);
+
+    this.startTime = startHours * 60 + startMinutes;
+    this.endTime = endHours * 60 + endMinutes;
+
+    // FOR FUTURE, raise error if dayString not in ["Mon", "Tue", "Wed", "Thu", "Fri"]
+    this.dayNumber = ["Mon", "Tue", "Wed", "Thu", "Fri"].indexOf(dayString);
+    this.calculateLength();
+  }
 }
 
 class TimeTablePage extends StatefulWidget {
@@ -108,154 +103,89 @@ class _TimeTablePageState extends State<TimeTablePage> {
   final List<String> daysAxis = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   bool deleteButtonPressed = false;
   bool editButtonPressed = false;
-  final int gridColumns = 15;
-  final int gridRows = 8;
-  final List<TimetableItem2> overlayData = [
-    TimetableItem2('wow', Colors.blue, 2, 2),
-    TimetableItem2('wow', Colors.red, 2, 2),
-    TimetableItem2('wow', Colors.blue, 2, 2),
-  ];
 
-  final List<int> overlayIndices = [2, 5, 7];
   String? selectedBatch = 'Choose your batch';
   String? selectedFaculty = 'Choose your faculty';
   final List<String> texts = ['Text 1', 'Text 2'];
   final List<String> timeAxis = [];
-  final List<TimetableItem> timetableData = [
-    TimetableItem('', Colors.white),
-    TimetableItem('8:00 - 8:30', Colors.black12),
-    TimetableItem('8:30 - 9:00', Colors.black12),
-    TimetableItem('9:00 - 9:30', Colors.black12),
-    TimetableItem('9:30 - 10:00', Colors.black12),
-    TimetableItem('10:00 - 10:30', Colors.black12),
-    TimetableItem('10:30 - 11:00', Colors.black12),
-    TimetableItem('11:00 - 11:30', Colors.black12),
-    TimetableItem('11:30 - 12:00', Colors.black12),
-    TimetableItem('12:00 - 12:30', Colors.black12),
-    TimetableItem('12:30 - 1:00', Colors.black12),
-    TimetableItem('1:00 - 1:30', Colors.black12),
-    TimetableItem('1:30 - 2:00', Colors.black12),
-    TimetableItem('2:00 - 2:30', Colors.black12),
-    TimetableItem('2:30 - 3:00', Colors.black12),
-    TimetableItem('Mon', Colors.black45),
-    TimetableItem('ES341\nACB MLH', Colors.red),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('ES341\nACB MLH', Colors.red),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('Tue', Colors.black45),
-    TimetableItem('', Colors.white),
-    TimetableItem('ES341\nACB MLH', Colors.red),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('ES341\nACB MLH', Colors.red),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('Wed', Colors.black45),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('Thu', Colors.black45),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('Fri', Colors.black45),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('Sat', Colors.black45),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('Sun', Colors.black45),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    TimetableItem('', Colors.white),
-    // Add more items as needed
-  ];
+
+  bool insertTimetableSlot(TimetableSlot newSlot) {
+    bool LiesInBetween(int x, int a, int b, int state) {
+      if (state == 0) {
+        if (x > a && x < b) return true;
+      } else if (state == 1) {
+        if (x >= a && x < b) return true;
+      } else if (state == 2) {
+        if (x > a && x <= b) return true;
+      } else if (state == 3) {
+        if (x >= a && x <= b) return true;
+      }
+      return false;
+    }
+
+    int insertIndex = -1;
+    bool indexFound = false;
+    for (int i = 0; i < TimetableSlots.length; i++) {
+      insertIndex = i;
+
+      if (TimetableSlots[i].dayNumber == newSlot.dayNumber) {
+        if (LiesInBetween(TimetableSlots[i].endTime, newSlot.startTime, newSlot.endTime, 2)) {
+          print("CLASH: slots ${TimetableSlots[i].course} and ${TimetableSlots[i + 1].course}  on day ${TimetableSlots[i].dayString}.");
+          return false;
+        }
+
+        if (LiesInBetween(TimetableSlots[i].startTime, newSlot.startTime, newSlot.endTime, 1)) {
+          print("CLASH: slots ${TimetableSlots[i].course} and ${TimetableSlots[i + 1].course}  on day ${TimetableSlots[i].dayString}.");
+          return false;
+        }
+
+        if (indexFound == false && TimetableSlots[i].startTime > newSlot.startTime) {
+          indexFound = true;
+          insertIndex = i;
+          break;
+        }
+      } else if (indexFound == false && TimetableSlots[i].dayNumber > newSlot.dayNumber) {
+          indexFound = true;
+          insertIndex = i;
+          break;
+      }
+    } 
+    
+    if(!indexFound){
+      insertIndex++;
+    }
+
+    TimetableSlots.insert(insertIndex, newSlot);
+    return true;
+  }
+
+  void updateContainersToPrint() {
+    ContainersToPrint.clear();
+
+    int currentDay = -1;
+    int currentTime = 0;
+    for (int i = 0; i < TimetableSlots.length; i++) {
+      if (TimetableSlots[i].dayNumber > currentDay) {
+        currentTime = 480 - TimeAxisUnitTime ~/ 2; // 8:00 AM;
+        currentDay = TimetableSlots[i].dayNumber;
+      }
+
+      ContainersToPrint.add(TimetableSlot.FromValues(currentTime, TimetableSlots[i].startTime, TimetableSlots[i].dayNumber));
+      ContainersToPrint.add(TimetableSlots[i]);
+      currentTime = TimetableSlots[i].endTime;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
 
+    ResetDialogBoxValues();
+
     for (int i = 8; i <= 17; i++) {
       timeAxis.add('${i}:00');
       timeAxis.add('${i}:30');
     }
-    print(timeAxis);
 
     // returnValue is equivalent to a-b (negative means b > a)
     TimetableSlots.sort((a, b) {
@@ -276,36 +206,78 @@ class _TimeTablePageState extends State<TimeTablePage> {
       }
     }
 
-    int currentDay = -1;
-    int currentTime = 0;
-    for (int i = 0; i < TimetableSlots.length; i++) {
-      if (TimetableSlots[i].dayNumber > currentDay) {
-        currentTime = 480 - TimeAxisUnitTime ~/ 2; // 8:00 AM;
-        currentDay = TimetableSlots[i].dayNumber;
+    updateContainersToPrint();
+  }
+
+  late String selectedStartTimeInDialogBox;
+  late String selectedEndTimeInDialogBox;
+  late String selectedDay;
+  late String enteredCourse;
+  late String enteredVenue;
+  late String enteredNotes;
+
+  void ResetDialogBoxValues() {
+    String selectedStartTimeInDialogBox = "08:00 AM";
+    String selectedEndTimeInDialogBox = "09:00 AM";
+    String selectedDay = "Day";
+    String enteredCourse = "";
+    String enteredVenue = "";
+    String enteredNotes = "";
+  }
+
+  String convertTimeTo24Hours(String time) {
+    String hours = time.split(":")[0];
+    String minutes = time.split(":")[1].split(" ")[0];
+    String ampm = time.split(":")[1].split(" ")[1];
+
+    if (ampm == "AM") {
+      if (hours == "12") {
+        hours = "00";
       }
-
-      ContainersToPrint.add(TimetableSlot.FromValues(currentTime, TimetableSlots[i].startTime, TimetableSlots[i].dayNumber));
-      ContainersToPrint.add(TimetableSlots[i]);
-      currentTime = TimetableSlots[i].endTime;
+    } else {
+      if (hours != "12") {
+        hours = (int.parse(hours) + 12).toString();
+      }
     }
+
+    return hours + ":" + minutes;
   }
 
-  int toRowMajor(int index) {
-    return index % gridRows * gridColumns + index ~/ gridRows;
-    // rows passed * rows + columns passed
+  int convertTimeToInteger(String time) {
+    int hours = int.parse(time.split(":")[0]);
+    int minutes = int.parse(time.split(":")[1]);
+
+    return hours * 60 + minutes;
   }
 
-  int toColumnMajor(int index) {
-    return index % gridColumns * gridRows + index ~/ gridColumns;
-    // columns passed * rows + rows passed
+  String convertTimeToString(int time) {
+    String hours = (time ~/ 60).toString();
+    String minutes = (time % 60).toString();
+
+    return "$hours:$minutes";
   }
 
-  Future<void> _showTextInputDialog(BuildContext context, TimetableItem item) async {
-    TextEditingController textController1 = TextEditingController();
-    textController1.text = item.text.split("\n")[0];
-    TextEditingController textController2 = TextEditingController();
-    textController2.text = item.text.split("\n").length > 1 ? item.text.split("\n")[1] : "";
-    Color currentColor = Color(0xFF123123); // Initial color
+  Future<void> _showTextInputDialog(BuildContext context) async {
+    TextEditingController textControllerCourse = TextEditingController();
+    textControllerCourse.text = enteredCourse;
+    TextEditingController textControllerVenue = TextEditingController();
+    textControllerVenue.text = enteredVenue;
+    TextEditingController textControllerNotes = TextEditingController();
+    textControllerNotes.text = enteredNotes;
+
+    Color currentColor = DefaultSlotColor; // Initial color
+
+    void UpdateValuesAndReopen() {
+      // setState(() {
+      enteredCourse = textControllerCourse.text;
+      enteredVenue = textControllerVenue.text;
+      enteredNotes = textControllerNotes.text;
+      // });
+
+      // NOTE: I came to this after wasting too much time. For some reason, even though setState above works it doesn't modify the ElevatedButton text
+      Navigator.of(context).pop();
+      _showTextInputDialog(context);
+    }
 
     return showDialog(
       context: context,
@@ -314,84 +286,178 @@ class _TimeTablePageState extends State<TimeTablePage> {
           backgroundColor: Colors.white,
           title: Text('Enter Details'),
           content: Container(
-            height: 275,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: textController1,
-                  decoration: InputDecoration(labelText: 'Enter Course:', hintText: 'For example, ES324'),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: textController2,
-                  decoration: InputDecoration(labelText: 'Enter Venue:', hintText: 'For example, ACB MLH'),
-                ),
-                SizedBox(height: 10),
-                Expanded(
-                  child:
-                      //   // MaterialPicker(
-                      //   //   pickerColor: currentColor,
-                      //   //   onColorChanged: (Color color) {
-                      //   //     currentColor = color;
-                      //   //   },
-                      //   //   enableLabel: true,
-                      //   // ),
-                      // ),
+            // height: 300,
+            // width: 300,
+            // height: 350,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                // mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: 180,
+                      ),
+                      width: 180,
+                      decoration: BoxDecoration(
+                        color: Colors.white, // Set the background color
+                        borderRadius: BorderRadius.circular(30), // Optional: Set border radius
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: DropdownButton<String>(
+                          selectedItemBuilder: (BuildContext context) {
+                            return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                              return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
+                            }).toList();
+                          },
+                          items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Center(
+                                  child: Text(
+                                value,
+                                // textAlign: TextAlign.center,
+                              )),
+                            );
+                          }).toList(),
+                          onChanged: (String? value) => setState(() {
+                            selectedDay = value ?? "";
 
-                      Center(
-                    child: BlockPicker(
-                      pickerColor: currentColor,
-                      onColorChanged: (Color color) {
-                        currentColor = color;
-                      },
-                      availableColors: const [
-                        Color.fromARGB(255, 255, 159, 152),
-                        Color.fromARGB(255, 242, 86, 75),
-                        Colors.red,
-                        Color.fromARGB(255, 197, 13, 0),
-                        Color.fromARGB(255, 157, 245, 160),
-                        Color.fromARGB(255, 80, 236, 85),
-                        Color.fromARGB(255, 71, 189, 75),
-                        Color.fromARGB(255, 28, 138, 31),
-                        Color.fromARGB(255, 157, 207, 249),
-                        Color.fromARGB(255, 82, 160, 225),
-                        Colors.blue,
-                        Color.fromARGB(255, 11, 108, 188),
-                        Color.fromARGB(255, 255, 247, 176),
-                        Color.fromARGB(255, 255, 241, 118),
-                        Color.fromARGB(255, 255, 237, 72),
-                        Color.fromARGB(255, 255, 230, 0),
-                        Color.fromARGB(255, 255, 216, 156),
-                        Color.fromARGB(255, 255, 192, 96),
-                        Color.fromARGB(255, 255, 177, 60),
-                        Colors.orange,
-                        Color.fromARGB(255, 241, 160, 255),
-                        Color.fromARGB(255, 206, 68, 231),
-                        Color.fromARGB(255, 178, 42, 202),
-                        Color.fromARGB(255, 159, 1, 187),
-                        Color.fromARGB(255, 167, 11, 194),
-                        Colors.pink,
-                        Colors.teal,
-                        Colors.cyan,
-                        Colors.brown,
-                        Colors.grey,
-                        Colors.black,
-                      ],
+                            UpdateValuesAndReopen();
+                          }),
+                          value: selectedDay,
+                          icon: const Icon(Icons.arrow_downward), // Custom icon
+                          iconSize: 20, // Set icon size
+                          elevation: 0, // Dropdown menu elevation
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontFamily: 'Roboto',
+                          ),
+                          dropdownColor: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        children: [
+                          Text("Start Time"),
+                          ElevatedButton(
+                            child: Text(selectedStartTimeInDialogBox),
+                            onPressed: () async {
+                              // Show the time picker dialog
+                              final TimeOfDay? selectedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              );
 
-                  //   ColorPicker(
-                  //   pickerColor: currentColor,
-                  //   onColorChanged: (Color color) {
-                  //     currentColor = color;
-                  //   },
-                  //   enableAlpha: false,
-                  //   showLabel: true,
-                  //   pickerAreaHeightPercent: 0.8,
-                  // ),
-                ),
-              ],
+                              // Do something with the selected time
+                              if (selectedTime != null) {
+                                print("setState called");
+                                // setState(() {
+                                selectedStartTimeInDialogBox = selectedTime.format(context);
+                                // });
+                              }
+
+                              UpdateValuesAndReopen();
+                            },
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Text("End Time"),
+                          ElevatedButton(
+                            child: Text(selectedEndTimeInDialogBox),
+                            onPressed: () async {
+                              // Show the time picker dialog
+                              final TimeOfDay? selectedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              );
+
+                              // Do something with the selected time
+                              if (selectedTime != null) {
+                                print("setState called");
+                                // setState(() {
+                                selectedEndTimeInDialogBox = selectedTime.format(context);
+                                // });
+                              }
+
+                              UpdateValuesAndReopen();
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  TextField(
+                    controller: textControllerCourse,
+                    decoration: InputDecoration(labelText: 'Enter Course:', hintText: 'ES324'),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: textControllerVenue,
+                    decoration: InputDecoration(labelText: 'Enter Venue:', hintText: 'ACB MLH'),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: textControllerNotes,
+                    decoration: InputDecoration(labelText: 'Enter Notes:', hintText: 'Quiz in this class'),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    height: 130,
+                    child: Center(
+                      child: BlockPicker(
+                        pickerColor: currentColor,
+                        onColorChanged: (Color color) {
+                          currentColor = color;
+                        },
+                        availableColors: const [
+                          Color.fromARGB(255, 255, 159, 152),
+                          Color.fromARGB(255, 242, 86, 75),
+                          Colors.red,
+                          Color.fromARGB(255, 197, 13, 0),
+                          Color.fromARGB(255, 157, 245, 160),
+                          Color.fromARGB(255, 80, 236, 85),
+                          Color.fromARGB(255, 71, 189, 75),
+                          Color.fromARGB(255, 28, 138, 31),
+                          Color.fromARGB(255, 157, 207, 249),
+                          Color.fromARGB(255, 82, 160, 225),
+                          Colors.blue,
+                          Color.fromARGB(255, 11, 108, 188),
+                          Color.fromARGB(255, 255, 247, 176),
+                          Color.fromARGB(255, 255, 241, 118),
+                          Color.fromARGB(255, 255, 237, 72),
+                          Color.fromARGB(255, 255, 230, 0),
+                          Color.fromARGB(255, 255, 216, 156),
+                          Color.fromARGB(255, 255, 192, 96),
+                          Color.fromARGB(255, 255, 177, 60),
+                          Colors.orange,
+                          Color.fromARGB(255, 241, 160, 255),
+                          Color.fromARGB(255, 206, 68, 231),
+                          Color.fromARGB(255, 178, 42, 202),
+                          Color.fromARGB(255, 159, 1, 187),
+                          Color.fromARGB(255, 167, 11, 194),
+                          Colors.pink,
+                          Colors.teal,
+                          Colors.cyan,
+                          Colors.brown,
+                          Colors.grey,
+                          Colors.black,
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -399,24 +465,55 @@ class _TimeTablePageState extends State<TimeTablePage> {
               onPressed: () {
                 // close the dialog
                 Navigator.of(context).pop();
+
+                ResetDialogBoxValues();
               },
               child: Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
-                // Handle the input and close the dialog
-                setState(() {
-                  // don't add \n if venue empty, to keep text vertically centered
-                  item.text = textController1.text.toUpperCase() + (textController2.text == "" ? "" : "\n" + textController2.text.toUpperCase());
+                // NOTE: Show WARNINGS HERE
+                if (selectedDay == "Day") return;
 
-                  // if user selected a color
-                  if (currentColor != Color(0xFF123123)) {
-                    item.color = currentColor;
-                  }
+                int selectedStartTime = convertTimeToInteger(convertTimeTo24Hours(selectedStartTimeInDialogBox));
+                int selectedEndTime = convertTimeToInteger(convertTimeTo24Hours(selectedEndTimeInDialogBox));
+                if (selectedStartTime >= selectedEndTime) return;
+
+                // Make sure the time is between 8:00 AM and 5:30 PM
+                // NOTE: Make constants her
+                if (selectedStartTime < 480 || selectedEndTime > 1050) return;
+
+                // Handle the input and close the dialog
+                TimetableSlot newSlot = TimetableSlot.Empty();
+                newSlot.course = textControllerCourse.text.toUpperCase();
+                newSlot.venue = textControllerVenue.text.toUpperCase();
+                newSlot.notes = textControllerNotes.text;
+
+                newSlot.dayString = selectedDay;
+                newSlot.startTimeString = convertTimeToString(selectedStartTime);
+                newSlot.endTimeString = convertTimeToString(selectedEndTime);
+
+                newSlot.calculateValues();
+
+                // if user selected a color
+                if (currentColor != DefaultSlotColor) {
+                  newSlot.color = currentColor;
+                }
+
+                if(insertTimetableSlot(newSlot) == false){
+                  print("CLASH: ${newSlot.course} on ${newSlot.dayString} has clash btw ${newSlot.startTime} and ${newSlot.endTime}.");
+                  return;
+                }
+
+                setState(() {
+                  updateContainersToPrint();
                 });
-                print('Typed text 1: ${textController1.text}');
-                print('Typed text 2: ${textController2.text}');
+
+                print('Typed text course: ${textControllerCourse.text}');
+                print('Typed text venue: ${textControllerVenue.text}');
+                print('Typed text notes: ${textControllerNotes.text}');
                 Navigator.of(context).pop();
+                ResetDialogBoxValues();
               },
               child: Text('OK'),
             ),
@@ -603,8 +700,17 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                       if (deleteButtonPressed) {
                                                         setState(() {
                                                           ContainersToPrint[containerNumber - 1].updateEndTime(ContainersToPrint[containerNumber].endTime);
+                                                          TimetableSlots.remove(ContainersToPrint[containerNumber]);
                                                           ContainersToPrint.remove(ContainersToPrint[containerNumber]);
+
+                                                          if(containerNumber < ContainersToPrint.length && ContainersToPrint[containerNumber - 1].dayNumber == ContainersToPrint[containerNumber].dayNumber){
+                                                            ContainersToPrint[containerNumber - 1].updateEndTime(ContainersToPrint[containerNumber].endTime);
+                                                            ContainersToPrint.remove(ContainersToPrint[containerNumber]);
+                                                          } else {
+                                                            ContainersToPrint.remove(ContainersToPrint[containerNumber - 1]);
+                                                          }
                                                         });
+                                                        return;
                                                       }
                                                     },
                                                     child: Container(
@@ -685,13 +791,18 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         if (deleteButtonPressed || editButtonPressed) {
                         } else {
                           addButtonPressed = !addButtonPressed;
+                          if (addButtonPressed) {
+                            print("Add button unpressed");
+                            addButtonPressed = false;
+                          }
                         }
                       });
+                      _showTextInputDialog(context);
                     },
                     child: Text(
                       addButtonPressed ? "Cancel" : "Add",
@@ -755,13 +866,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     ),
                     onPressed: () {
                       setState(() {
-                        print("$addButtonPressed $editButtonPressed $deleteButtonPressed");
                         if (addButtonPressed || editButtonPressed) {
                         } else {
                           deleteButtonPressed = !deleteButtonPressed;
-                          if (deleteButtonPressed == false) {
-                            copyIndex = -1;
-                          }
                         }
                       });
                     },
