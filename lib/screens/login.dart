@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:timetable/screens/TimeTablePage.dart';
+// import 'package:timetable/screens/TimeTablePage.dart';
+import 'package:timetable/screens/TimeTablePageUpdated.dart';
 import 'dart:convert';
 import '../config/config.dart';
 

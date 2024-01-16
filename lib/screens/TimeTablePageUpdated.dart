@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -8,12 +7,14 @@ double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 65;
 
 double TimeAxisBreadth = 60;
-double DayAxisBreadth = 100;
+double DayAxisBreadth = 65;
 
 double TimeAxisUnitTime = 30;
 
-Color DefaultGridColor = Color.fromARGB(255, 239, 173, 173);
-Color DefaultSlotColor = Color.fromARGB(255, 61, 103, 219);
+Color DefaultGridColor = Color.fromARGB(255, 81, 157, 251);
+Color DefaultSlotColor = Colors.red;
+Color DefaultDayAxisColor = Color.fromARGB(255, 157, 34, 224);
+Color DefaultTimeAxisColor = Color.fromARGB(255, 248, 47, 255);
 
 Color getRandomColor() {
   Random random = Random();
@@ -38,8 +39,8 @@ class TimetableSlot {
   String venue = "";
   String notes = "";
 
-  // Color? color = DefaultGridColor;
-  Color? color = getRandomColor();
+  Color? color = DefaultGridColor;
+  // Color? color = getRandomColor();
   late double length;
 
   TimetableSlot.Empty() {
@@ -110,7 +111,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
     // TimetableSlot.FromStrings("10:00", "11:00", "Mon", "ES341", "ACB MLH", "", Colors.red),
     TimetableSlot.FromStrings("8:00", "11:00", "Mon", "ES341", "ACB MLH GroundFLOOR like it or not", "", Colors.red),
     TimetableSlot.FromStrings("8:00", "11:00", "Fri", "ES341", "ACB MLH", "", Colors.red),
-    TimetableSlot.FromStrings("10:00", "11:00", "Tue", "CS324", "ACB LH2", "", Colors.blue),
+    TimetableSlot.FromStrings("10:00", "11:00", "Tue", "CS324", "ACB LH2", "", Colors.pink),
     TimetableSlot.FromStrings("12:00", "13:00", "Wed", "CS311", "ACB LH5", "", Colors.orange),
     TimetableSlot.FromStrings("8:00", "9:00", "Thu", "ES304", "ACB LH6", "", Colors.purple),
   ];
@@ -171,7 +172,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
     if (!indexFound) {
       insertIndex++;
     }
-    
+
     TimetableSlots.insert(insertIndex, newSlot);
     return true;
   }
@@ -269,12 +270,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
       if (hours > 12) {
         hours -= 12;
       }
-      return hours.toString() + ":" + minutes.toString() + " PM";
+      return hours.toString() + ":" + (minutes < 10 ? "0" : "") + minutes.toString() + " PM";
     } else {
       if (hours == 0) {
         hours = 12;
       }
-      return hours.toString() + ":" + minutes.toString() + " AM";
+      return hours.toString() + ":" + (minutes < 10 ? "0" : "") + minutes.toString() + " AM";
     }
   }
 
@@ -318,12 +319,15 @@ class _TimeTablePageState extends State<TimeTablePage> {
     TextEditingController textControllerNotes = TextEditingController();
     textControllerNotes.text = enteredNotes;
 
-
-    void UpdateValuesAndReopen() {
-      // setState(() {
+    void UpdateValues() {
       enteredCourse = textControllerCourse.text;
       enteredVenue = textControllerVenue.text;
       enteredNotes = textControllerNotes.text;
+    }
+
+    void UpdateValuesAndReopen() {
+      // setState(() {
+      UpdateValues();
       // });
 
       // NOTE: I came to this after wasting too much time. For some reason, even though setState above works it doesn't modify the ElevatedButton text
@@ -460,6 +464,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   ),
                   SizedBox(height: 10),
                   TextField(
+                    maxLines: 2,
                     controller: textControllerNotes,
                     decoration: InputDecoration(labelText: 'Enter Notes:', hintText: 'Quiz in this class'),
                   ),
@@ -472,7 +477,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         onColorChanged: (Color color) {
                           selectedColor = color;
                         },
-                        availableColors: const [
+                        availableColors: [
                           Color.fromARGB(255, 255, 159, 152),
                           Color.fromARGB(255, 242, 86, 75),
                           Colors.red,
@@ -497,13 +502,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
                           Color.fromARGB(255, 206, 68, 231),
                           Color.fromARGB(255, 178, 42, 202),
                           Color.fromARGB(255, 159, 1, 187),
-                          Color.fromARGB(255, 167, 11, 194),
-                          Colors.pink,
-                          Colors.teal,
-                          Colors.cyan,
-                          Colors.brown,
-                          Colors.grey,
-                          Colors.black,
+                          Colors.white,
+                          Colors.grey.shade400,
+                          Colors.grey.shade700,
+                          Colors.blueGrey.shade700,
                         ],
                       ),
                     ),
@@ -516,10 +518,13 @@ class _TimeTablePageState extends State<TimeTablePage> {
             ElevatedButton(
               child: Text('Cancel'),
               onPressed: () {
+                // UI choice. Do we always want to restore previous values on cancel? Or only when we manually entered them?
+                // if(!editingON)
+                UpdateValues();
+
                 // close the dialog
                 Navigator.of(context).pop();
-
-                ResetDialogBoxValues();
+                // ResetDialogBoxValues();
               },
             ),
             ElevatedButton(
@@ -540,7 +545,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 TimetableSlot newSlot = TimetableSlot.Empty();
                 late TimetableSlot oldSlot;
                 bool editingON = (containerNumber != -1);
-                if(editingON) {
+                if (editingON) {
                   oldSlot = TimetableSlot.Copy(ContainersToPrint[containerNumber]);
                 }
 
@@ -554,21 +559,23 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
                 newSlot.calculateValues();
 
-                // NOTE: Take care of this above. 
+                // NOTE: Take care of this above.
                 // NOT SURE ABOUT THIS CONDITION
                 if (selectedColor != DefaultSlotColor) {
                   newSlot.color = selectedColor;
                 }
 
-                if(editingON) {
+                if (editingON) {
                   deleteTimetableSlot(containerNumber);
                 }
-                
+
                 if (insertTimetableSlot(newSlot) == false) {
                   print("CLASH: ${newSlot.course} on ${newSlot.dayString} has clash btw ${newSlot.startTime} and ${newSlot.endTime}.");
 
-                  if(editingON) insertTimetableSlot(oldSlot);
-                  else return;
+                  if (editingON)
+                    insertTimetableSlot(oldSlot);
+                  else
+                    return;
                 } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
                 setState(() {
@@ -724,9 +731,20 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                 Container(
                                   height: DayAxisBreadth,
                                   width: TimeAxisBreadth,
-                                  color: getRandomColor(),
+                                  color: DefaultDayAxisColor,
                                 ),
-                                for (int i = 0; i < daysAxis.length; i++) Container(height: DayAxisBreadth, width: DayAxisUnitLength, color: getRandomColor(), child: Center(child: Text(daysAxis[i]))),
+                                for (int i = 0; i < daysAxis.length; i++)
+                                  Container(
+                                      height: DayAxisBreadth,
+                                      width: DayAxisUnitLength,
+                                      color: DefaultDayAxisColor,
+                                      child: Center(
+                                          child: Text(
+                                        daysAxis[i],
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ))),
                               ],
                             ),
 
@@ -738,7 +756,17 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                 Column(
                                   children: [
                                     for (int i = 0; i < timeAxis.length; i++)
-                                      Container(width: TimeAxisBreadth, height: TimeAxisUnitLength, color: getRandomColor(), child: Center(child: Text(timeAxis[i]))),
+                                      Container(
+                                          width: TimeAxisBreadth,
+                                          height: TimeAxisUnitLength,
+                                          color: DefaultTimeAxisColor,
+                                          child: Center(
+                                              child: Text(
+                                            timeAxis[i],
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ))),
                                   ],
                                 ),
 
