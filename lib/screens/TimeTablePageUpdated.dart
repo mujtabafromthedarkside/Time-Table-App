@@ -26,20 +26,6 @@ Color getRandomColor() {
 }
 
 class TimetableSlot {
-  TimetableSlot.Empty() {
-    this.color = DefaultSlotColor;
-  }
-
-  TimetableSlot.FromStrings(this.startTimeString, this.endTimeString, this.dayString, this.course, this.venue, this.notes, this.color) {
-    this.calculateValues();
-  }
-
-  TimetableSlot.FromValues(this.startTime, this.endTime, this.dayNumber) {
-    // time ratio * unit length
-    this.calculateLength();
-  }
-
-  // Color? color = DefaultGridColor;
   late int startTime;
   late int endTime;
   late int dayNumber;
@@ -52,8 +38,39 @@ class TimetableSlot {
   String venue = "";
   String notes = "";
 
+  // Color? color = DefaultGridColor;
   Color? color = getRandomColor();
   late double length;
+
+  TimetableSlot.Empty() {
+    this.color = DefaultSlotColor;
+  }
+
+  TimetableSlot.Copy(TimetableSlot other) {
+    this.startTime = other.startTime;
+    this.endTime = other.endTime;
+    this.dayNumber = other.dayNumber;
+
+    this.dayString = other.dayString;
+    this.endTimeString = other.endTimeString;
+    this.startTimeString = other.startTimeString;
+
+    this.course = other.course;
+    this.venue = other.venue;
+    this.notes = other.notes;
+
+    this.color = other.color;
+    this.length = other.length;
+  }
+
+  TimetableSlot.FromStrings(this.startTimeString, this.endTimeString, this.dayString, this.course, this.venue, this.notes, this.color) {
+    this.calculateValues();
+  }
+
+  TimetableSlot.FromValues(this.startTime, this.endTime, this.dayNumber) {
+    // time ratio * unit length
+    this.calculateLength();
+  }
 
   void updateEndTime(int newEndTime) {
     this.endTime = newEndTime;
@@ -130,12 +147,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
       if (TimetableSlots[i].dayNumber == newSlot.dayNumber) {
         if (LiesInBetween(TimetableSlots[i].endTime, newSlot.startTime, newSlot.endTime, 2)) {
-          print("CLASH: slots ${TimetableSlots[i].course} and ${TimetableSlots[i + 1].course}  on day ${TimetableSlots[i].dayString}.");
+          print("CLASH: slots ${TimetableSlots[i].course} and ${newSlot.course}  on day ${TimetableSlots[i].dayString}.");
           return false;
         }
 
         if (LiesInBetween(TimetableSlots[i].startTime, newSlot.startTime, newSlot.endTime, 1)) {
-          print("CLASH: slots ${TimetableSlots[i].course} and ${TimetableSlots[i + 1].course}  on day ${TimetableSlots[i].dayString}.");
+          print("CLASH: slots ${TimetableSlots[i].course} and ${newSlot.course}  on day ${TimetableSlots[i].dayString}.");
           return false;
         }
 
@@ -145,16 +162,16 @@ class _TimeTablePageState extends State<TimeTablePage> {
           break;
         }
       } else if (indexFound == false && TimetableSlots[i].dayNumber > newSlot.dayNumber) {
-          indexFound = true;
-          insertIndex = i;
-          break;
+        indexFound = true;
+        insertIndex = i;
+        break;
       }
-    } 
-    
-    if(!indexFound){
-      insertIndex++;
     }
 
+    if (!indexFound) {
+      insertIndex++;
+    }
+    
     TimetableSlots.insert(insertIndex, newSlot);
     return true;
   }
@@ -175,6 +192,23 @@ class _TimeTablePageState extends State<TimeTablePage> {
       currentTime = TimetableSlots[i].endTime;
     }
   }
+
+  void deleteTimetableSlot(int containerNumber) {
+    if (containerNumber < 0 || containerNumber >= ContainersToPrint.length) return;
+
+    ContainersToPrint[containerNumber - 1].updateEndTime(ContainersToPrint[containerNumber].endTime);
+    TimetableSlots.remove(ContainersToPrint[containerNumber]);
+    ContainersToPrint.remove(ContainersToPrint[containerNumber]);
+
+    if (containerNumber < ContainersToPrint.length && ContainersToPrint[containerNumber - 1].dayNumber == ContainersToPrint[containerNumber].dayNumber) {
+      ContainersToPrint[containerNumber - 1].updateEndTime(ContainersToPrint[containerNumber].endTime);
+      ContainersToPrint.remove(ContainersToPrint[containerNumber]);
+    } else {
+      ContainersToPrint.remove(ContainersToPrint[containerNumber - 1]);
+    }
+  }
+
+  void addTimetableSlot() {}
 
   @override
   void initState() {
@@ -215,14 +249,33 @@ class _TimeTablePageState extends State<TimeTablePage> {
   late String enteredCourse;
   late String enteredVenue;
   late String enteredNotes;
+  late Color selectedColor = DefaultSlotColor; // Initial color
 
   void ResetDialogBoxValues() {
-    String selectedStartTimeInDialogBox = "08:00 AM";
-    String selectedEndTimeInDialogBox = "09:00 AM";
-    String selectedDay = "Day";
-    String enteredCourse = "";
-    String enteredVenue = "";
-    String enteredNotes = "";
+    selectedStartTimeInDialogBox = "08:00 AM";
+    selectedEndTimeInDialogBox = "09:00 AM";
+    selectedDay = "Day";
+    enteredCourse = "";
+    enteredVenue = "";
+    enteredNotes = "";
+    selectedColor = DefaultSlotColor; // Initial color
+  }
+
+  String convertTimeToAMPM(String time) {
+    int hours = int.parse(time.split(":")[0]);
+    int minutes = int.parse(time.split(":")[1]);
+
+    if (hours >= 12) {
+      if (hours > 12) {
+        hours -= 12;
+      }
+      return hours.toString() + ":" + minutes.toString() + " PM";
+    } else {
+      if (hours == 0) {
+        hours = 12;
+      }
+      return hours.toString() + ":" + minutes.toString() + " AM";
+    }
   }
 
   String convertTimeTo24Hours(String time) {
@@ -257,7 +310,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
     return "$hours:$minutes";
   }
 
-  Future<void> _showTextInputDialog(BuildContext context) async {
+  Future<void> _showTextInputDialog(BuildContext context, int containerNumber) async {
     TextEditingController textControllerCourse = TextEditingController();
     textControllerCourse.text = enteredCourse;
     TextEditingController textControllerVenue = TextEditingController();
@@ -265,7 +318,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
     TextEditingController textControllerNotes = TextEditingController();
     textControllerNotes.text = enteredNotes;
 
-    Color currentColor = DefaultSlotColor; // Initial color
 
     void UpdateValuesAndReopen() {
       // setState(() {
@@ -276,7 +328,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
       // NOTE: I came to this after wasting too much time. For some reason, even though setState above works it doesn't modify the ElevatedButton text
       Navigator.of(context).pop();
-      _showTextInputDialog(context);
+      _showTextInputDialog(context, containerNumber);
     }
 
     return showDialog(
@@ -416,9 +468,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     height: 130,
                     child: Center(
                       child: BlockPicker(
-                        pickerColor: currentColor,
+                        pickerColor: selectedColor,
                         onColorChanged: (Color color) {
-                          currentColor = color;
+                          selectedColor = color;
                         },
                         availableColors: const [
                           Color.fromARGB(255, 255, 159, 152),
@@ -462,15 +514,16 @@ class _TimeTablePageState extends State<TimeTablePage> {
           ),
           actions: [
             ElevatedButton(
+              child: Text('Cancel'),
               onPressed: () {
                 // close the dialog
                 Navigator.of(context).pop();
 
                 ResetDialogBoxValues();
               },
-              child: Text('Cancel'),
             ),
             ElevatedButton(
+              child: Text('OK'),
               onPressed: () {
                 // NOTE: Show WARNINGS HERE
                 if (selectedDay == "Day") return;
@@ -485,6 +538,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
                 // Handle the input and close the dialog
                 TimetableSlot newSlot = TimetableSlot.Empty();
+                late TimetableSlot oldSlot;
+                bool editingON = (containerNumber != -1);
+                if(editingON) {
+                  oldSlot = TimetableSlot.Copy(ContainersToPrint[containerNumber]);
+                }
+
                 newSlot.course = textControllerCourse.text.toUpperCase();
                 newSlot.venue = textControllerVenue.text.toUpperCase();
                 newSlot.notes = textControllerNotes.text;
@@ -495,15 +554,22 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
                 newSlot.calculateValues();
 
-                // if user selected a color
-                if (currentColor != DefaultSlotColor) {
-                  newSlot.color = currentColor;
+                // NOTE: Take care of this above. 
+                // NOT SURE ABOUT THIS CONDITION
+                if (selectedColor != DefaultSlotColor) {
+                  newSlot.color = selectedColor;
                 }
 
-                if(insertTimetableSlot(newSlot) == false){
-                  print("CLASH: ${newSlot.course} on ${newSlot.dayString} has clash btw ${newSlot.startTime} and ${newSlot.endTime}.");
-                  return;
+                if(editingON) {
+                  deleteTimetableSlot(containerNumber);
                 }
+                
+                if (insertTimetableSlot(newSlot) == false) {
+                  print("CLASH: ${newSlot.course} on ${newSlot.dayString} has clash btw ${newSlot.startTime} and ${newSlot.endTime}.");
+
+                  if(editingON) insertTimetableSlot(oldSlot);
+                  else return;
+                } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
                 setState(() {
                   updateContainersToPrint();
@@ -515,7 +581,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 Navigator.of(context).pop();
                 ResetDialogBoxValues();
               },
-              child: Text('OK'),
             ),
           ],
         );
@@ -699,17 +764,20 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                       if (ContainersToPrint[containerNumber].dayString == "") return;
                                                       if (deleteButtonPressed) {
                                                         setState(() {
-                                                          ContainersToPrint[containerNumber - 1].updateEndTime(ContainersToPrint[containerNumber].endTime);
-                                                          TimetableSlots.remove(ContainersToPrint[containerNumber]);
-                                                          ContainersToPrint.remove(ContainersToPrint[containerNumber]);
-
-                                                          if(containerNumber < ContainersToPrint.length && ContainersToPrint[containerNumber - 1].dayNumber == ContainersToPrint[containerNumber].dayNumber){
-                                                            ContainersToPrint[containerNumber - 1].updateEndTime(ContainersToPrint[containerNumber].endTime);
-                                                            ContainersToPrint.remove(ContainersToPrint[containerNumber]);
-                                                          } else {
-                                                            ContainersToPrint.remove(ContainersToPrint[containerNumber - 1]);
-                                                          }
+                                                          deleteTimetableSlot(containerNumber);
                                                         });
+                                                        return;
+                                                      }
+
+                                                      if (editButtonPressed) {
+                                                        selectedDay = ContainersToPrint[containerNumber].dayString;
+                                                        selectedStartTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].startTimeString);
+                                                        selectedEndTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].endTimeString);
+                                                        enteredCourse = ContainersToPrint[containerNumber].course;
+                                                        enteredVenue = ContainersToPrint[containerNumber].venue;
+                                                        enteredNotes = ContainersToPrint[containerNumber].notes;
+                                                        selectedColor = ContainersToPrint[containerNumber].color ?? DefaultSlotColor;
+                                                        _showTextInputDialog(context, containerNumber);
                                                         return;
                                                       }
                                                     },
@@ -802,7 +870,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                           }
                         }
                       });
-                      _showTextInputDialog(context);
+                      _showTextInputDialog(context, -1);
                     },
                     child: Text(
                       addButtonPressed ? "Cancel" : "Add",
