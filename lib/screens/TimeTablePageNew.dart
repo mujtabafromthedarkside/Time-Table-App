@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 double TimeAxisUnitLength = 65;
-double DayAxisUnitLength = 65;
+double DayAxisUnitLength = 72;
 
 double TimeAxisBreadth = 60;
 double DayAxisBreadth = 65;
@@ -264,18 +264,18 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
   String convertTimeToAMPM(String time) {
     int hours = int.parse(time.split(":")[0]);
-    int minutes = int.parse(time.split(":")[1]);
+    String minutes = time.split(":")[1];
 
     if (hours >= 12) {
       if (hours > 12) {
         hours -= 12;
       }
-      return hours.toString() + ":" + (minutes < 10 ? "0" : "") + minutes.toString() + " PM";
+      return hours.toString() + ":" + minutes + " PM";
     } else {
       if (hours == 0) {
         hours = 12;
       }
-      return hours.toString() + ":" + (minutes < 10 ? "0" : "") + minutes.toString() + " AM";
+      return hours.toString() + ":" + minutes + " AM";
     }
   }
 
@@ -308,10 +308,63 @@ class _TimeTablePageState extends State<TimeTablePage> {
     String hours = (time ~/ 60).toString();
     String minutes = (time % 60).toString();
 
-    return "$hours:$minutes";
+    return "$hours:${minutes.length == 1 ? "0$minutes": minutes}";
   }
 
-  Future<void> _showTextInputDialog(BuildContext context, int containerNumber) async {
+  Future<void> showViewDialog(BuildContext context, int containerNumber) async {
+    return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              backgroundColor: ContainersToPrint[containerNumber].color,
+              title: Text(
+                ContainersToPrint[containerNumber].course + " - " + ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][ContainersToPrint[containerNumber].dayNumber],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  // fontSize: 20,
+                ),
+              ),
+              content: Container(
+                  // height: 300,
+                  // width: 300,
+                  // height: 350,
+                  child: SingleChildScrollView(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          // mainAxisSize: MainAxisSize.min,
+                          children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          children: [
+                            Text("Start Time", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            Container(
+                              child: Text(ContainersToPrint[containerNumber].startTimeString, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text("End Time", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            Container(
+                              child: Text(ContainersToPrint[containerNumber].endTimeString, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Text("Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text(ContainersToPrint[containerNumber].venue, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
+                    if(ContainersToPrint[containerNumber].notes != "")
+                      Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    if(ContainersToPrint[containerNumber].notes != "")
+                      Text(ContainersToPrint[containerNumber].notes, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+                  ]))));
+        });
+  }
+
+  Future<void> showEditDialog(BuildContext context, int containerNumber) async {
     TextEditingController textControllerCourse = TextEditingController();
     textControllerCourse.text = enteredCourse;
     TextEditingController textControllerVenue = TextEditingController();
@@ -332,7 +385,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
       // NOTE: I came to this after wasting too much time. For some reason, even though setState above works it doesn't modify the ElevatedButton text
       Navigator.of(context).pop();
-      _showTextInputDialog(context, containerNumber);
+      showEditDialog(context, containerNumber);
     }
 
     return showDialog(
@@ -759,7 +812,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                       Container(
                                           width: TimeAxisBreadth,
                                           height: TimeAxisUnitLength,
-                                          color: DefaultTimeAxisColor,
+                                          // color: DefaultTimeAxisColor,
+                                          decoration: BoxDecoration(
+                                            color: DefaultTimeAxisColor,
+                                            // makes the border disappear, nice hack
+                                            border: Border(bottom: BorderSide(color: DefaultTimeAxisColor, width: 0.0)),
+                                          ),
                                           child: Center(
                                               child: Text(
                                             timeAxis[i],
@@ -805,9 +863,16 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                         enteredVenue = ContainersToPrint[containerNumber].venue;
                                                         enteredNotes = ContainersToPrint[containerNumber].notes;
                                                         selectedColor = ContainersToPrint[containerNumber].color ?? DefaultSlotColor;
-                                                        _showTextInputDialog(context, containerNumber);
+                                                        showEditDialog(context, containerNumber);
                                                         return;
                                                       }
+                                                    },
+                                                    onDoubleTap: () {
+                                                      if (ContainersToPrint[containerNumber].dayString == "") return;
+                                                      if (deleteButtonPressed || addButtonPressed || editButtonPressed) return;
+
+                                                      showViewDialog(context, containerNumber);
+                                                      return;
                                                     },
                                                     child: Container(
                                                       padding: EdgeInsets.all(5),
@@ -898,7 +963,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                           }
                         }
                       });
-                      _showTextInputDialog(context, -1);
+                      showEditDialog(context, -1);
                     },
                     child: Text(
                       addButtonPressed ? "Cancel" : "Add",

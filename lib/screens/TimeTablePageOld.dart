@@ -8,6 +8,15 @@ class TimetableItem {
   TimetableItem(this.text, this.color);
 }
 
+class TimetableItem2 {
+  String text;
+  Color? color;
+  int idx;
+  int size;
+
+  TimetableItem2(this.text, this.color, this.size, this.idx);
+}
+
 class TimeTablePage extends StatefulWidget {
   const TimeTablePage({super.key});
 
@@ -126,6 +135,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
   String? selectedBatch = 'Choose your batch';
   String? selectedFaculty = 'Choose your faculty';
+
+  final List<TimetableItem2> overlayData = [
+    TimetableItem2('wow', Colors.blue, 2, 2),
+    TimetableItem2('wow', Colors.red, 2, 2),
+    TimetableItem2('wow', Colors.blue, 2, 2),
+  ];
+
+  final List<int> overlayIndices = [2, 5, 7];
 
     final List<TimetableItem> timetableData = [
     TimetableItem('', Colors.white),
@@ -400,8 +417,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
                ),
              ),
 
-             Expanded(
-          child: GridView.builder(
+          Expanded(
+          child: 
+      //     Stack(
+      //   children: [
+      //     // Grid using GridView.builder
+          GridView.builder(
             scrollDirection: Axis.horizontal,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: gridRows, // One for each day of the week
@@ -427,30 +448,29 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
                         print('pasted $copyIndex to $index');
                       }
-                    }
-                    else if(editButtonPressed){
+                    } else if(editButtonPressed){
                       _showTextInputDialog(context, item);
                     }
                     // timetableData[index].color = Colors.red;
                   });
                 },
                 child: Container(
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.all(5),
-                  // color: Colors.blue[200],
-                  color: item.color,
-
-                  // child: Text('ES341\nACB MLH'),
-                  child: Center(
-                    child: Text(
-                      item.text,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'Roboto',
+                    padding: EdgeInsets.all(10),
+                    margin: EdgeInsets.all(5),
+                    // color: Colors.blue[200],
+                    color: item.color,
+                  
+                    // child: Text('ES341\nACB MLH'),
+                    child: Center(
+                      child: Text(
+                        item.text,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Roboto',
+                        ),
                       ),
                     ),
                   ),
-                ),
               );
             },
           ),
@@ -548,7 +568,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
                      ),
                      onPressed: () {
                       setState(() {
-                        print("copy button pressed");
                         print("$editButtonPressed $resizeButtonPressed $copyButtonPressed");
                         if(editButtonPressed || resizeButtonPressed){}
                         else {
