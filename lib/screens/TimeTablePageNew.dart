@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:timetable/config/API_funcs.dart';
+import 'package:timetable/config/config.dart';
 
 double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 72;
@@ -13,8 +15,8 @@ double TimeAxisUnitTime = 30;
 
 Color DefaultGridColor = Color.fromARGB(255, 81, 157, 251);
 Color DefaultSlotColor = Colors.red;
-Color DefaultDayAxisColor = Color.fromARGB(255, 157, 34, 224);
-Color DefaultTimeAxisColor = Color.fromARGB(255, 248, 47, 255);
+Color DefaultDayAxisColor = Color.fromARGB(255, 0, 255, 255);
+Color DefaultTimeAxisColor = Color.fromARGB(255, 0, 255, 255);
 
 Color getRandomColor() {
   Random random = Random();
@@ -1048,5 +1050,25 @@ class _TimeTablePageState extends State<TimeTablePage> {
         ),
       ),
     );
+  }
+
+  Future<void> fetchData(BuildContext context, String selectedCity) async {
+    try {
+      String url = URL;
+      print(url);
+      final jsonData = await getterAPI(url);
+
+      // Navigate to the next page while passing the realEstateDataList.
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => Home(),
+      //   ),
+      // );
+
+    } catch (e) {
+      // Handle any errors that occur during the API requests.
+      print('Error: $e');
+    }
   }
 }
