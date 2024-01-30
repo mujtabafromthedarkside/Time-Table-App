@@ -14,11 +14,26 @@ double TimeAxisBreadth = 60;
 double DayAxisBreadth = 65;
 
 double TimeAxisUnitTime = 30;
+String TimeAxisStartTimeString = "08:00";
+String TimeAxisEndTimeString = "17:30";
+
+int convertTimeToInteger(String time) {
+  int hours = int.parse(time.split(":")[0]);
+  int minutes = int.parse(time.split(":")[1]);
+
+  return hours * 60 + minutes;
+}
+
+int TimeAxisStartTime = convertTimeToInteger(TimeAxisStartTimeString);
+int TimeAxisEndTime = convertTimeToInteger(TimeAxisEndTimeString);
 
 Color DefaultGridColor = Color.fromARGB(255, 81, 157, 251);
 Color DefaultSlotColor = Colors.red;
 Color DefaultDayAxisColor = Color.fromARGB(255, 0, 255, 255);
 Color DefaultTimeAxisColor = Color.fromARGB(255, 0, 255, 255);
+
+String defaultBatchText = "Choose your batch";
+String defaultFacultyText = "Choose your faculty";
 
 Color getRandomColor() {
   Random random = Random();
@@ -98,6 +113,9 @@ class TimetableSlot {
 
     // FOR FUTURE, raise error if dayString not in ["Mon", "Tue", "Wed", "Thu", "Fri"]
     this.dayNumber = ["Mon", "Tue", "Wed", "Thu", "Fri"].indexOf(dayString);
+    if (this.dayNumber == -1) {
+      this.dayNumber = ["monday", "tuesday", "wednesday", "thursday", "friday"].indexOf(dayString);
+    }
     this.calculateLength();
   }
 }
@@ -126,8 +144,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
   bool deleteButtonPressed = false;
   bool editButtonPressed = false;
 
-  String? selectedBatch = 'Choose your batch';
-  String? selectedFaculty = 'Choose your faculty';
+  String selectedBatch = defaultBatchText;
+  String selectedFaculty = defaultFacultyText;
   final List<String> texts = ['Text 1', 'Text 2'];
   final List<String> timeAxis = [];
 
@@ -144,6 +162,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
       }
       return false;
     }
+
+        // if time does not lie in our axis
+    if(!LiesInBetween(newSlot.startTime, TimeAxisStartTime, TimeAxisEndTime, 3)) return false;
+    if(!LiesInBetween(newSlot.endTime, TimeAxisStartTime, TimeAxisEndTime, 3)) return false;
 
     int insertIndex = -1;
     bool indexFound = false;
@@ -212,8 +234,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
       ContainersToPrint.remove(ContainersToPrint[containerNumber - 1]);
     }
   }
-
-  void addTimetableSlot() {}
 
   @override
   void initState() {
@@ -694,12 +714,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         child: DropdownButton<String>(
                           isExpanded: true,
                           selectedItemBuilder: (BuildContext context) {
-                            return <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
+                            return <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
                               // return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
                               return Center(child: Text(value, style: TextStyle(color: Colors.black, fontSize: 14)));
                             }).toList();
                           },
-                          items: <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
+                          items: <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Center(
@@ -716,12 +736,26 @@ class _TimeTablePageState extends State<TimeTablePage> {
                           //   });
 
                           // },
-                          onChanged: (String? value) => setState(() {
-                            selectedBatch = value ?? "";
-                          }),
+                          onChanged: (String? value) {
+                            setState(() {
+                              selectedBatch = value ?? "";
+                            });
+
+                            if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
+                              String faculty = selectedFaculty + selectedBatch;
+
+                              Map<String, String> dataToSend = {"faculty": faculty};
+
+                              contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
+                                setState(() {
+                                  ReadTimetable(receivedTimetable);
+                                });
+                              });
+                            }
+                          },
                           value: selectedBatch,
                           // onChanged: (_){},
-                          // hint: const Text('Choose your batch'),
+                          // hint: const Text(defaultBatchText),
 
                           icon: const Icon(Icons.arrow_downward), // Custom icon
                           iconSize: 20, // Set icon size
@@ -750,11 +784,11 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         child: DropdownButton<String>(
                           isExpanded: true,
                           selectedItemBuilder: (BuildContext context) {
-                            return <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
+                            return <String>[defaultFacultyText, 'AI', 'CS', 'ME'].map((String value) {
                               return Center(child: Text(value, style: TextStyle(color: Colors.black, fontSize: 14)));
                             }).toList();
                           },
-                          items: <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
+                          items: <String>[defaultFacultyText, 'AI', 'CS', 'ME'].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Center(
@@ -764,9 +798,23 @@ class _TimeTablePageState extends State<TimeTablePage> {
                               )),
                             );
                           }).toList(),
-                          onChanged: (String? value) => setState(() {
-                            selectedFaculty = value ?? "";
-                          }),
+                          onChanged: (String? value) {
+                            setState(() {
+                              selectedFaculty = value ?? "";
+                            });
+
+                            if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
+                              String faculty = selectedFaculty + selectedBatch;
+
+                              Map<String, String> dataToSend = {"faculty": faculty};
+
+                              contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
+                                setState(() {
+                                  ReadTimetable(receivedTimetable);
+                                });
+                              });
+                            }
+                          },
                           value: selectedFaculty,
                           icon: const Icon(Icons.arrow_downward), // Custom icon
                           iconSize: 20, // Set icon size
@@ -1067,22 +1115,55 @@ class _TimeTablePageState extends State<TimeTablePage> {
     );
   }
 
-  Future<void> fetchData(BuildContext context, String selectedCity) async {
-    try {
-      String url = URL;
-      print(url);
-      final jsonData = await getterAPI(url);
+  /// Construct a color from a hex code string, of the format #RRGGBB.
+  Color hexToColor(String code) {
+    return Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
+  }
 
-      // Navigate to the next page while passing the realEstateDataList.
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => Home(),
-      //   ),
-      // );
+  ReadTimetable(Map<String, dynamic> Data) {
+    TimetableSlots.clear();
+
+    Data.forEach((day, slot) {
+      if (slot == "")
+        ;
+      else {
+        slot.forEach((startTime, remainingSlot) {
+          insertTimetableSlot(TimetableSlot.FromStrings(
+              startTime,
+              remainingSlot["end_time"],
+              day,
+              remainingSlot["subject"],
+              remainingSlot["venue"],
+              // remainingSlot["notes"],
+              "",
+              hexToColor(remainingSlot["color"])));
+        });
+      }
+    });
+
+    updateContainersToPrint();
+  }
+
+  Future<Map<String, dynamic>> contactDatabase(BuildContext context, String suffixAPI, Map<String, String> dataToSend) async {
+    try {
+      String url = URL + suffixAPI;
+      print(url);
+      // final dataToSend = {
+      //   "faculty": "AI31",
+      //   "day": "friday",
+      //   "color": "#FF5733",
+      //   "start_time": "9:00",
+      //   "end_time": "12:00",
+      //   "venue": "LH3 FCSE",
+      //   "subject": "CS221"
+      // };
+      final jsonData = await getterAPIWithDataPOST(url, data: dataToSend);
+      print(jsonData);
+      return jsonData;
     } catch (e) {
       // Handle any errors that occur during the API requests.
       print('Error: $e');
+      return {};
     }
   }
 }
