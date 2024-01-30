@@ -312,7 +312,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
     String hours = (time ~/ 60).toString();
     String minutes = (time % 60).toString();
 
-    return "$hours:${minutes.length == 1 ? "0$minutes": minutes}";
+    return "$hours:${minutes.length == 1 ? "0$minutes" : minutes}";
   }
 
   Future<void> showViewDialog(BuildContext context, int containerNumber) async {
@@ -322,7 +322,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
           return AlertDialog(
               backgroundColor: ContainersToPrint[containerNumber].color,
               title: Text(
-                ContainersToPrint[containerNumber].course + " - " + ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][ContainersToPrint[containerNumber].dayNumber],
+                ContainersToPrint[containerNumber].course +
+                    " - " +
+                    ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][ContainersToPrint[containerNumber].dayNumber],
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   // fontSize: 20,
@@ -360,9 +362,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     ),
                     Text("Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                     Text(ContainersToPrint[containerNumber].venue, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
-                    if(ContainersToPrint[containerNumber].notes != "")
-                      Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    if(ContainersToPrint[containerNumber].notes != "")
+                    if (ContainersToPrint[containerNumber].notes != "") Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    if (ContainersToPrint[containerNumber].notes != "")
                       Text(ContainersToPrint[containerNumber].notes, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
                   ]))));
         });
@@ -410,47 +411,47 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
                     child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: 180,
-                      ),
-                      width: 180,
+                      width: 150,
                       decoration: BoxDecoration(
                         color: Colors.white, // Set the background color
                         borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DropdownButton<String>(
-                          selectedItemBuilder: (BuildContext context) {
-                            return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                              return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
-                            }).toList();
-                          },
-                          items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Center(
-                                  child: Text(
-                                value,
-                                // textAlign: TextAlign.center,
-                              )),
-                            );
-                          }).toList(),
-                          onChanged: (String? value) => setState(() {
-                            selectedDay = value ?? "";
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            selectedItemBuilder: (BuildContext context) {
+                              return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                                return Center(child: Text(value, style: TextStyle(color: Colors.black)));
+                              }).toList();
+                            },
+                            items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Center(
+                                    child: Text(
+                                  value,
+                                  // textAlign: TextAlign.center,
+                                )),
+                              );
+                            }).toList(),
+                            onChanged: (String? value) => setState(() {
+                              selectedDay = value ?? "";
 
-                            UpdateValuesAndReopen();
-                          }),
-                          value: selectedDay,
-                          icon: const Icon(Icons.arrow_downward), // Custom icon
-                          iconSize: 20, // Set icon size
-                          elevation: 0, // Dropdown menu elevation
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontFamily: 'Roboto',
+                              UpdateValuesAndReopen();
+                            }),
+                            value: selectedDay,
+                            icon: const Icon(Icons.arrow_downward), // Custom icon
+                            iconSize: 20, // Set icon size
+                            elevation: 0, // Dropdown menu elevation
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontFamily: 'Roboto',
+                            ),
+                            dropdownColor: Colors.white,
                           ),
-                          dropdownColor: Colors.white,
                         ),
                       ),
                     ),
@@ -678,113 +679,113 @@ class _TimeTablePageState extends State<TimeTablePage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // Batch Dropdown
                   Container(
-                    constraints: BoxConstraints(
-                      maxWidth: 180,
-                    ),
-                    width: 180,
+                    width: 160,
                     decoration: BoxDecoration(
                       color: Colors.blue, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: DropdownButton<String>(
-                        selectedItemBuilder: (BuildContext context) {
-                          return <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
-                            // return Center(
-                            //   child: Text(
-                            //     value,
-                            //     // textAlign: TextAlign.center,
-                            //   )
-                            // );
-                            return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
-                          }).toList();
-                        },
-                        items: <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Center(
-                                child: Text(
-                              value,
-                              // textAlign: TextAlign.center,
-                            )),
-                          );
-                        }).toList(),
-                        // value: selectedOption,
-                        // onChanged: (newValue) {
-                        //   setState(() {
-                        //     selectedOption = newValue;
-                        //   });
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          selectedItemBuilder: (BuildContext context) {
+                            return <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
+                              // return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
+                              return Center(child: Text(value, style: TextStyle(color: Colors.black, fontSize: 14)));
+                            }).toList();
+                          },
+                          items: <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Center(
+                                  child: Text(
+                                value,
+                                // textAlign: TextAlign.center,
+                              )),
+                            );
+                          }).toList(),
+                          // value: selectedOption,
+                          // onChanged: (newValue) {
+                          //   setState(() {
+                          //     selectedOption = newValue;
+                          //   });
 
-                        // },
-                        onChanged: (String? value) => setState(() {
-                          selectedBatch = value ?? "";
-                        }),
-                        value: selectedBatch,
-                        // onChanged: (_){},
-                        // hint: const Text('Choose your batch'),
+                          // },
+                          onChanged: (String? value) => setState(() {
+                            selectedBatch = value ?? "";
+                          }),
+                          value: selectedBatch,
+                          // onChanged: (_){},
+                          // hint: const Text('Choose your batch'),
 
-                        icon: const Icon(Icons.arrow_downward), // Custom icon
-                        iconSize: 20, // Set icon size
-                        elevation: 0, // Dropdown menu elevation
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontFamily: 'Roboto',
+                          icon: const Icon(Icons.arrow_downward), // Custom icon
+                          iconSize: 20, // Set icon size
+                          elevation: 0, // Dropdown menu elevation
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontFamily: 'Roboto',
+                          ),
+                          dropdownColor: Colors.blue,
                         ),
-                        dropdownColor: Colors.blue,
                       ),
                     ),
                   ),
+
+                  // Faculty Dropdown
                   Container(
-                    constraints: BoxConstraints(
-                      maxWidth: 180,
-                    ),
-                    width: 180,
+                    width: 160,
                     decoration: BoxDecoration(
                       color: Colors.blue, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: DropdownButton<String>(
-                        selectedItemBuilder: (BuildContext context) {
-                          return <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
-                            return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
-                          }).toList();
-                        },
-                        items: <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Center(
-                                child: Text(
-                              value,
-                              // textAlign: TextAlign.center,
-                            )),
-                          );
-                        }).toList(),
-                        onChanged: (String? value) => setState(() {
-                          selectedFaculty = value ?? "";
-                        }),
-                        value: selectedFaculty,
-                        icon: const Icon(Icons.arrow_downward), // Custom icon
-                        iconSize: 20, // Set icon size
-                        elevation: 0, // Dropdown menu elevation
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontFamily: 'Roboto',
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          selectedItemBuilder: (BuildContext context) {
+                            return <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
+                              return Center(child: Text(value, style: TextStyle(color: Colors.black, fontSize: 14)));
+                            }).toList();
+                          },
+                          items: <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Center(
+                                  child: Text(
+                                value,
+                                // textAlign: TextAlign.center,
+                              )),
+                            );
+                          }).toList(),
+                          onChanged: (String? value) => setState(() {
+                            selectedFaculty = value ?? "";
+                          }),
+                          value: selectedFaculty,
+                          icon: const Icon(Icons.arrow_downward), // Custom icon
+                          iconSize: 20, // Set icon size
+                          elevation: 0, // Dropdown menu elevation
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontFamily: 'Roboto',
+                          ),
+                          dropdownColor: Colors.blue,
                         ),
-                        dropdownColor: Colors.blue,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
+
+            // Timetable
             Expanded(
                 child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
@@ -1079,7 +1080,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
       //     builder: (context) => Home(),
       //   ),
       // );
-
     } catch (e) {
       // Handle any errors that occur during the API requests.
       print('Error: $e');
