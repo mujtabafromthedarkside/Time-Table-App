@@ -5,6 +5,8 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:timetable/config/API_funcs.dart';
 import 'package:timetable/config/config.dart';
 
+import 'LandingPage.dart';
+
 double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 72;
 
@@ -655,6 +657,18 @@ class _TimeTablePageState extends State<TimeTablePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Time Table"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Handle back button press here
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LandingPage(),
+              ),
+            );
+          },
+        ),
       ),
       body: Center(
         child: Column(
