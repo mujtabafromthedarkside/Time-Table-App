@@ -28,7 +28,7 @@ int TimeAxisStartTime = convertTimeToInteger(TimeAxisStartTimeString);
 int TimeAxisEndTime = convertTimeToInteger(TimeAxisEndTimeString);
 
 Color DefaultGridColor = Color.fromARGB(255, 81, 157, 251);
-Color DefaultSlotColor = Colors.red;
+Color DefaultSlotColor = const Color.fromARGB(255, 244, 67, 54);
 Color DefaultDayAxisColor = Color.fromARGB(255, 0, 255, 255);
 Color DefaultTimeAxisColor = Color.fromARGB(255, 0, 255, 255);
 
@@ -149,6 +149,19 @@ class _TimeTablePageState extends State<TimeTablePage> {
   final List<String> texts = ['Text 1', 'Text 2'];
   final List<String> timeAxis = [];
 
+  Map<String, String> ConvertTimetableSlotToMap(TimetableSlot slot) {
+    return {
+      "faculty": selectedFaculty + selectedBatch,
+      "day":
+          slot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "start_time": slot.startTimeString,
+      "end_time": slot.endTimeString,
+      "venue": slot.venue,
+      "subject": slot.course,
+      "color": slot.color.toString().replaceFirst("Color(0xff", "#").replaceFirst(")", ""), // Also needs to be standardized.
+    };
+  }
+
   bool insertTimetableSlot(TimetableSlot newSlot) {
     bool LiesInBetween(int x, int a, int b, int state) {
       if (state == 0) {
@@ -163,9 +176,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
       return false;
     }
 
-        // if time does not lie in our axis
-    if(!LiesInBetween(newSlot.startTime, TimeAxisStartTime, TimeAxisEndTime, 3)) return false;
-    if(!LiesInBetween(newSlot.endTime, TimeAxisStartTime, TimeAxisEndTime, 3)) return false;
+    // if time does not lie in our axis
+    if (!LiesInBetween(newSlot.startTime, TimeAxisStartTime, TimeAxisEndTime, 3)) return false;
+    if (!LiesInBetween(newSlot.endTime, TimeAxisStartTime, TimeAxisEndTime, 3)) return false;
 
     int insertIndex = -1;
     bool indexFound = false;
@@ -558,7 +571,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         availableColors: [
                           Color.fromARGB(255, 255, 159, 152),
                           Color.fromARGB(255, 242, 86, 75),
-                          Colors.red,
+                          const Color.fromARGB(255, 244, 67, 54),
                           Color.fromARGB(255, 197, 13, 0),
                           Color.fromARGB(255, 157, 245, 160),
                           Color.fromARGB(255, 80, 236, 85),
@@ -566,7 +579,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                           Color.fromARGB(255, 28, 138, 31),
                           Color.fromARGB(255, 157, 207, 249),
                           Color.fromARGB(255, 82, 160, 225),
-                          Colors.blue,
+                          const Color.fromARGB(255, 33, 150, 243),
                           Color.fromARGB(255, 11, 108, 188),
                           Color.fromARGB(255, 255, 247, 176),
                           Color.fromARGB(255, 255, 241, 118),
@@ -575,15 +588,15 @@ class _TimeTablePageState extends State<TimeTablePage> {
                           Color.fromARGB(255, 255, 216, 156),
                           Color.fromARGB(255, 255, 192, 96),
                           Color.fromARGB(255, 255, 177, 60),
-                          Colors.orange,
+                          const Color.fromARGB(255, 255, 152, 0),
                           Color.fromARGB(255, 241, 160, 255),
                           Color.fromARGB(255, 206, 68, 231),
                           Color.fromARGB(255, 178, 42, 202),
                           Color.fromARGB(255, 159, 1, 187),
-                          Colors.white,
-                          Colors.grey.shade400,
-                          Colors.grey.shade700,
-                          Colors.blueGrey.shade700,
+                          const Color.fromRGBO(255, 255, 255, 1),
+                          const Color.fromRGBO(189, 189, 189, 1),
+                          const Color.fromRGBO(97, 97, 97, 1),
+                          const Color.fromRGBO(69, 90, 100, 1),
                         ],
                       ),
                     ),
@@ -656,8 +669,13 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     return;
                 } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
-                setState(() {
-                  updateContainersToPrint();
+                // NOTE: add error handling if database not contacted
+                contactDatabase(context, 'add_timetable', ConvertTimetableSlotToMap(newSlot)).then((returnStatus) {
+                  if(returnStatus.isEmpty) return;
+
+                  setState(() {
+                    updateContainersToPrint();
+                  });
                 });
 
                 print('Typed text course: ${textControllerCourse.text}');
