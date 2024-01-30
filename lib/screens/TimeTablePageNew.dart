@@ -149,16 +149,23 @@ class _TimeTablePageState extends State<TimeTablePage> {
   final List<String> texts = ['Text 1', 'Text 2'];
   final List<String> timeAxis = [];
 
-  Map<String, String> ConvertTimetableSlotToMap(TimetableSlot slot) {
+  Map<String, String> toAddMap(TimetableSlot slot) {
     return {
       "faculty": selectedFaculty + selectedBatch,
-      "day":
-          slot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "day": slot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
       "start_time": slot.startTimeString,
       "end_time": slot.endTimeString,
       "venue": slot.venue,
       "subject": slot.course,
       "color": slot.color.toString().replaceFirst("Color(0xff", "#").replaceFirst(")", ""), // Also needs to be standardized.
+    };
+  }
+
+  Map<String, String> toDeleteMap(TimetableSlot slot) {
+    return {
+      "faculty": selectedFaculty + selectedBatch,
+      "day": slot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "start_time": slot.startTimeString,
     };
   }
 
@@ -355,9 +362,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
           return AlertDialog(
               backgroundColor: ContainersToPrint[containerNumber].color,
               title: Text(
-                ContainersToPrint[containerNumber].course +
-                    " - " +
-                    ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][ContainersToPrint[containerNumber].dayNumber],
+                ContainersToPrint[containerNumber].course + " - " + ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][ContainersToPrint[containerNumber].dayNumber],
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   // fontSize: 20,
@@ -396,8 +401,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     Text("Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                     Text(ContainersToPrint[containerNumber].venue, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
                     if (ContainersToPrint[containerNumber].notes != "") Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    if (ContainersToPrint[containerNumber].notes != "")
-                      Text(ContainersToPrint[containerNumber].notes, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+                    if (ContainersToPrint[containerNumber].notes != "") Text(ContainersToPrint[containerNumber].notes, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
                   ]))));
         });
   }
@@ -670,8 +674,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
                 // NOTE: add error handling if database not contacted
-                contactDatabase(context, 'add_timetable', ConvertTimetableSlotToMap(newSlot)).then((returnStatus) {
-                  if(returnStatus.isEmpty) return;
+                contactDatabase(context, 'add_timetable', toAddMap(newSlot)).then((returnStatus) {
+                  if (returnStatus.isEmpty) return;
 
                   setState(() {
                     updateContainersToPrint();
@@ -931,11 +935,15 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                   GestureDetector(
                                                     onTap: () {
                                                       if (ContainersToPrint[containerNumber].dayString == "") return;
+
                                                       if (deleteButtonPressed) {
-                                                        setState(() {
-                                                          deleteTimetableSlot(containerNumber);
+                                                        contactDatabase(context, 'delete_timetable', toDeleteMap(ContainersToPrint[containerNumber])).then((returnStatus) {
+                                                          if (returnStatus.isEmpty) return;
+
+                                                          setState(() {
+                                                            deleteTimetableSlot(containerNumber);
+                                                          });
                                                         });
-                                                        return;
                                                       }
 
                                                       if (editButtonPressed) {
