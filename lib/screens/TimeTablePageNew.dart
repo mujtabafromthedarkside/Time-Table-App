@@ -169,6 +169,21 @@ class _TimeTablePageState extends State<TimeTablePage> {
     };
   }
 
+  Map<String, String> toEditMap(TimetableSlot newSlot, TimetableSlot oldSlot) {
+    return {
+      "old_day": oldSlot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "old_start_time": oldSlot.startTimeString,
+      
+      "faculty": selectedFaculty + selectedBatch,
+      "day": newSlot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "start_time": newSlot.startTimeString,
+      "end_time": newSlot.endTimeString,
+      "venue": newSlot.venue,
+      "subject": newSlot.course,
+      "color": newSlot.color.toString().replaceFirst("Color(0xff", "#").replaceFirst(")", ""), // Also needs to be standardized.
+    };
+  }
+
   bool insertTimetableSlot(TimetableSlot newSlot) {
     bool LiesInBetween(int x, int a, int b, int state) {
       if (state == 0) {
@@ -673,14 +688,23 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     return;
                 } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
-                // NOTE: add error handling if database not contacted
-                contactDatabase(context, 'add_timetable', toAddMap(newSlot)).then((returnStatus) {
-                  if (returnStatus.isEmpty) return;
+                if (editingON) {
+                  contactDatabase(context, 'update_timetable', toEditMap(newSlot, oldSlot)).then((returnStatus) {
+                    if (returnStatus.isEmpty) return;
 
-                  setState(() {
-                    updateContainersToPrint();
+                    setState(() {
+                      updateContainersToPrint();
+                    });
                   });
-                });
+                } else {
+                  contactDatabase(context, 'add_timetable', toAddMap(newSlot)).then((returnStatus) {
+                    if (returnStatus.isEmpty) return;
+
+                    setState(() {
+                      updateContainersToPrint();
+                    });
+                  });
+                }
 
                 print('Typed text course: ${textControllerCourse.text}');
                 print('Typed text venue: ${textControllerVenue.text}');
