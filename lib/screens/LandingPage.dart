@@ -33,7 +33,7 @@ class LandingPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30)
                   ),
-                  backgroundColor: Color(0xFF357C93),
+                  backgroundColor: Color(0xFFE9A21A),
                   padding: EdgeInsets.only(left: 50, top: 12, right: 50, bottom: 12),
                 ),
               ),
@@ -55,9 +55,9 @@ class LandingPage extends StatelessWidget {
         "end_time": "12:00",
         "venue":"LH3 FCSE",
         "subject":"CS221"};
-      final jsonData = await getterAPIWithDataPOST(url, data: dataToSend);
+      //final jsonData = await getterAPIWithDataPOST(url, data: dataToSend);
 
-      print(jsonData);
+      //print(jsonData);
 
       Navigator.pushReplacement(
         context,

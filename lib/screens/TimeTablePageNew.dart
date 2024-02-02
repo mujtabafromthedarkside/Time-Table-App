@@ -1,9 +1,10 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:timetable/config/API_funcs.dart';
 import 'package:timetable/config/config.dart';
+import 'package:timetable/screens/SideBar.dart';
+import 'package:timetable/screens/login.dart';
 
 import 'LandingPage.dart';
 
@@ -722,8 +723,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: SideBar(),
       appBar: AppBar(
-        title: const Text("Time Table"),
+        title: const Text("Time Table App"),
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -736,6 +739,37 @@ class _TimeTablePageState extends State<TimeTablePage> {
             );
           },
         ),
+        actions: [
+          Padding(
+            padding:  EdgeInsets.only(right: 8.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                backgroundColor: addButtonPressed ? Colors.red : Colors.blue,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Login(),
+                  ),
+                );
+              },
+              child: Text(
+                "Login",
+                style: TextStyle(
+                  fontSize: 15,
+                  fontFamily: 'Roboto',
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: Column(
