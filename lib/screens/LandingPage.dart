@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:timetable/config/strings.dart';
+import 'package:timetable/config/config.dart';
+import 'package:timetable/screens/login.dart';
+
+import '../config/API_funcs.dart';
+import 'TimeTablePageNew.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -22,14 +26,9 @@ class LandingPage extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LandingPage(),
-                    ),
-                  );
+                  fetchData(context);
                 },
-                child: Text(LandingPageContinueButton, style: TextStyle(fontSize: 24),),
+                child: Text('dekhte hain', style: TextStyle(fontSize: 24, color: Colors.white), ),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30)
@@ -43,5 +42,32 @@ class LandingPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> fetchData(BuildContext context) async {
+    try {
+      String url = URL + "add_timetable";
+      print(url);
+      final dataToSend = {"faculty": "AI31",
+        "day": "friday",
+        "color": "#FF5733",
+        "start_time": "9:00",
+        "end_time": "12:00",
+        "venue":"LH3 FCSE",
+        "subject":"CS221"};
+      final jsonData = await getterAPIWithDataPOST(url, data: dataToSend);
+
+      print(jsonData);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TimeTablePage(),
+        ),
+      );
+    } catch (e) {
+      // Handle any errors that occur during the API requests.
+      print('Error: $e');
+    }
   }
 }

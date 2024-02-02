@@ -12,8 +12,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Time Table',
+      debugShowCheckedModeBanner: false,
       home: const LandingPage(),
     );
   }
 }
-
