@@ -3,10 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:timetable/config/API_funcs.dart';
 import 'package:timetable/config/config.dart';
+import 'package:timetable/config/strings.dart';
 import 'package:timetable/screens/SideBar.dart';
 import 'package:timetable/screens/login.dart';
 
 import 'LandingPage.dart';
+
+// Color GridColor = Color.fromARGB(255, 81, 157, 251);
+// Color SlotColor = const Color.fromARGB(255, 244, 67, 54);
+// Color DayAxisColor = Color.fromARGB(255, 0, 255, 255);
+// Color TimeAxisColor = Color.fromARGB(255, 0, 255, 255);
+// Color GridColor = Color.fromARGB(255, 255, 255, 255);
+Color GridColor = Color(0xFFFFFFEC);
+Color SlotColor = const Color.fromARGB(255, 244, 67, 54);
+Color DayAxisColor = LandingPageDarkBlue;
+Color TimeAxisColor = LandingPageDarkBlue;
+Color DropdownsBFColor = LandingPageBrightYellow; // Batch, Faculty Color
+Color EditButtonsColor = LandingPageBrightYellow;
+
+Color DropdownsTextColor = Colors.white;
+Color ButtonsTextColor = Colors.white;
+Color AppBarTextColor = Colors.white;
 
 double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 72;
@@ -27,11 +44,6 @@ int convertTimeToInteger(String time) {
 
 int TimeAxisStartTime = convertTimeToInteger(TimeAxisStartTimeString);
 int TimeAxisEndTime = convertTimeToInteger(TimeAxisEndTimeString);
-
-Color DefaultGridColor = Color.fromARGB(255, 81, 157, 251);
-Color DefaultSlotColor = const Color.fromARGB(255, 244, 67, 54);
-Color DefaultDayAxisColor = Color.fromARGB(255, 0, 255, 255);
-Color DefaultTimeAxisColor = Color.fromARGB(255, 0, 255, 255);
 
 String defaultBatchText = "Choose your batch";
 String defaultFacultyText = "Choose your faculty";
@@ -59,12 +71,12 @@ class TimetableSlot {
   String venue = "";
   String notes = "";
 
-  Color? color = DefaultGridColor;
+  Color? color = GridColor;
   // Color? color = getRandomColor();
   late double length;
 
   TimetableSlot.Empty() {
-    this.color = DefaultSlotColor;
+    this.color = SlotColor;
   }
 
   TimetableSlot.Copy(TimetableSlot other) {
@@ -132,11 +144,11 @@ class _TimeTablePageState extends State<TimeTablePage> {
   final List<TimetableSlot> ContainersToPrint = [];
   final List<TimetableSlot> TimetableSlots = [
     // TimetableSlot.FromStrings("10:00", "11:00", "Mon", "ES341", "ACB MLH", "", Colors.red),
-    TimetableSlot.FromStrings("8:00", "11:00", "Mon", "ES341", "ACB MLH GroundFLOOR like it or not", "", Colors.red),
-    TimetableSlot.FromStrings("8:00", "11:00", "Fri", "ES341", "ACB MLH", "", Colors.red),
-    TimetableSlot.FromStrings("10:00", "11:00", "Tue", "CS324", "ACB LH2", "", Colors.pink),
-    TimetableSlot.FromStrings("12:00", "13:00", "Wed", "CS311", "ACB LH5", "", Colors.orange),
-    TimetableSlot.FromStrings("8:00", "9:00", "Thu", "ES304", "ACB LH6", "", Colors.purple),
+    // TimetableSlot.FromStrings("8:00", "11:00", "Mon", "ES341", "ACB MLH GroundFLOOR like it or not", "", Colors.red),
+    // TimetableSlot.FromStrings("8:00", "11:00", "Fri", "ES341", "ACB MLH", "", Colors.red),
+    // TimetableSlot.FromStrings("10:00", "11:00", "Tue", "CS324", "ACB LH2", "", Colors.pink),
+    // TimetableSlot.FromStrings("12:00", "13:00", "Wed", "CS311", "ACB LH5", "", Colors.orange),
+    // TimetableSlot.FromStrings("8:00", "9:00", "Thu", "ES304", "ACB LH6", "", Colors.purple),
   ];
 
   bool addButtonPressed = false;
@@ -174,7 +186,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
     return {
       "old_day": oldSlot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
       "old_start_time": oldSlot.startTimeString,
-      
+
       "faculty": selectedFaculty + selectedBatch,
       "day": newSlot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
       "start_time": newSlot.startTimeString,
@@ -310,7 +322,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
   late String enteredCourse;
   late String enteredVenue;
   late String enteredNotes;
-  late Color selectedColor = DefaultSlotColor; // Initial color
+  late Color selectedColor = SlotColor; // Initial color
 
   void ResetDialogBoxValues() {
     selectedStartTimeInDialogBox = "08:00 AM";
@@ -319,7 +331,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
     enteredCourse = "";
     enteredVenue = "";
     enteredNotes = "";
-    selectedColor = DefaultSlotColor; // Initial color
+    selectedColor = SlotColor; // Initial color
   }
 
   String convertTimeToAMPM(String time) {
@@ -472,38 +484,40 @@ class _TimeTablePageState extends State<TimeTablePage> {
                       child: Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            selectedItemBuilder: (BuildContext context) {
-                              return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                                return Center(child: Text(value, style: TextStyle(color: Colors.black)));
-                              }).toList();
-                            },
-                            items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Center(
-                                    child: Text(
-                                  value,
-                                  // textAlign: TextAlign.center,
-                                )),
-                              );
-                            }).toList(),
-                            onChanged: (String? value) => setState(() {
-                              selectedDay = value ?? "";
-
-                              UpdateValuesAndReopen();
-                            }),
-                            value: selectedDay,
-                            icon: const Icon(Icons.arrow_downward), // Custom icon
-                            iconSize: 20, // Set icon size
-                            elevation: 0, // Dropdown menu elevation
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                              fontFamily: 'Roboto',
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              selectedItemBuilder: (BuildContext context) {
+                                return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                                  return Center(child: Text(value, style: TextStyle(color: Colors.black)));
+                                }).toList();
+                              },
+                              items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Center(
+                                      child: Text(
+                                    value,
+                                    // textAlign: TextAlign.center,
+                                  )),
+                                );
+                              }).toList(),
+                              onChanged: (String? value) => setState(() {
+                                selectedDay = value ?? "";
+                            
+                                UpdateValuesAndReopen();
+                              }),
+                              value: selectedDay,
+                              icon: const Icon(Icons.arrow_downward), // Custom icon
+                              iconSize: 20, // Set icon size
+                              elevation: 0, // Dropdown menu elevation
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontFamily: 'Roboto',
+                              ),
+                              dropdownColor: Colors.white,
                             ),
-                            dropdownColor: Colors.white,
                           ),
                         ),
                       ),
@@ -672,7 +686,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
                 // NOTE: Take care of this above.
                 // NOT SURE ABOUT THIS CONDITION
-                if (selectedColor != DefaultSlotColor) {
+                if (selectedColor != SlotColor) {
                   newSlot.color = selectedColor;
                 }
 
@@ -723,12 +737,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: LandingPageDarkBlue,
       drawer: SideBar(),
       appBar: AppBar(
+        backgroundColor: LandingPageDarkBlue,
         title: const Text("Time Table App"),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: AppBarTextColor),
           onPressed: () {
             // Handle back button press here
             Navigator.pushReplacement(
@@ -785,67 +801,73 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   Container(
                     width: 160,
                     decoration: BoxDecoration(
-                      color: Colors.blue, // Set the background color
+                      color: LandingPageBrightYellow, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
+                      // Set decoration to null or an empty BoxDecoration to remove the border
+                      // decoration: null,
+                      border: Border.all(width: 2, color: Colors.transparent),
                     ),
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          selectedItemBuilder: (BuildContext context) {
-                            return <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
-                              // return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
-                              return Center(child: Text(value, style: TextStyle(color: Colors.black, fontSize: 14)));
-                            }).toList();
-                          },
-                          items: <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Center(
-                                  child: Text(
-                                value,
-                                // textAlign: TextAlign.center,
-                              )),
-                            );
-                          }).toList(),
-                          // value: selectedOption,
-                          // onChanged: (newValue) {
-                          //   setState(() {
-                          //     selectedOption = newValue;
-                          //   });
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            selectedItemBuilder: (BuildContext context) {
+                              return <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
+                                // return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
+                                return Center(child: Text(value, style: TextStyle(color: DropdownsTextColor, fontSize: 14)));
+                              }).toList();
+                            },
+                            items: <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Center(
+                                    child: Text(
+                                  value,
+                                  style: TextStyle(color: DropdownsTextColor),
+                                  // textAlign: TextAlign.center,
+                                )),
+                              );
+                            }).toList(),
+                            // value: selectedOption,
+                            // onChanged: (newValue) {
+                            //   setState(() {
+                            //     selectedOption = newValue;
+                            //   });
 
-                          // },
-                          onChanged: (String? value) {
-                            setState(() {
-                              selectedBatch = value ?? "";
-                            });
-
-                            if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
-                              String faculty = selectedFaculty + selectedBatch;
-
-                              Map<String, String> dataToSend = {"faculty": faculty};
-
-                              contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
-                                setState(() {
-                                  ReadTimetable(receivedTimetable);
-                                });
+                            // },
+                            onChanged: (String? value) {
+                              setState(() {
+                                selectedBatch = value ?? "";
                               });
-                            }
-                          },
-                          value: selectedBatch,
-                          // onChanged: (_){},
-                          // hint: const Text(defaultBatchText),
 
-                          icon: const Icon(Icons.arrow_downward), // Custom icon
-                          iconSize: 20, // Set icon size
-                          elevation: 0, // Dropdown menu elevation
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontFamily: 'Roboto',
+                              if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
+                                String faculty = selectedFaculty + selectedBatch;
+
+                                Map<String, String> dataToSend = {"faculty": faculty};
+
+                                contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
+                                  setState(() {
+                                    ReadTimetable(receivedTimetable);
+                                  });
+                                });
+                              }
+                            },
+                            value: selectedBatch,
+                            // onChanged: (_){},
+                            // hint: const Text(defaultBatchText),
+
+                            icon: Icon(Icons.arrow_downward, color: DropdownsTextColor), // Custom icon
+                            iconSize: 20, // Set icon size
+                            elevation: 0, // Dropdown menu elevation
+                            style: TextStyle(
+                              color: DropdownsTextColor,
+                              fontSize: 16,
+                              fontFamily: 'Roboto',
+                            ),
+                            dropdownColor: LandingPageBrightYellow,
                           ),
-                          dropdownColor: Colors.blue,
                         ),
                       ),
                     ),
@@ -855,56 +877,57 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   Container(
                     width: 160,
                     decoration: BoxDecoration(
-                      color: Colors.blue, // Set the background color
+                      color: LandingPageBrightYellow, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                     ),
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          selectedItemBuilder: (BuildContext context) {
-                            return <String>[defaultFacultyText, 'AI', 'CS', 'ME'].map((String value) {
-                              return Center(child: Text(value, style: TextStyle(color: Colors.black, fontSize: 14)));
-                            }).toList();
-                          },
-                          items: <String>[defaultFacultyText, 'AI', 'CS', 'ME'].map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Center(
-                                  child: Text(
-                                value,
-                                // textAlign: TextAlign.center,
-                              )),
-                            );
-                          }).toList(),
-                          onChanged: (String? value) {
-                            setState(() {
-                              selectedFaculty = value ?? "";
-                            });
-
-                            if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
-                              String faculty = selectedFaculty + selectedBatch;
-
-                              Map<String, String> dataToSend = {"faculty": faculty};
-
-                              contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
-                                setState(() {
-                                  ReadTimetable(receivedTimetable);
-                                });
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            selectedItemBuilder: (BuildContext context) {
+                              return <String>[defaultFacultyText, 'AI', 'CS', 'ME'].map((String value) {
+                                return Center(child: Text(value, style: TextStyle(color: DropdownsTextColor, fontSize: 14)));
+                              }).toList();
+                            },
+                            items: <String>[defaultFacultyText, 'AI', 'CS', 'ME'].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Center(
+                                    child: Text(value
+                                        // textAlign: TextAlign.center,
+                                        )),
+                              );
+                            }).toList(),
+                            onChanged: (String? value) {
+                              setState(() {
+                                selectedFaculty = value ?? "";
                               });
-                            }
-                          },
-                          value: selectedFaculty,
-                          icon: const Icon(Icons.arrow_downward), // Custom icon
-                          iconSize: 20, // Set icon size
-                          elevation: 0, // Dropdown menu elevation
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontFamily: 'Roboto',
+                          
+                              if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
+                                String faculty = selectedFaculty + selectedBatch;
+                          
+                                Map<String, String> dataToSend = {"faculty": faculty};
+                          
+                                contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
+                                  setState(() {
+                                    ReadTimetable(receivedTimetable);
+                                  });
+                                });
+                              }
+                            },
+                            value: selectedFaculty,
+                            icon: Icon(Icons.arrow_downward, color: DropdownsTextColor), // Custom icon
+                            iconSize: 20, // Set icon size
+                            elevation: 0, // Dropdown menu elevation
+                            style: TextStyle(
+                              color: DropdownsTextColor,
+                              fontSize: 16,
+                              fontFamily: 'Roboto',
+                            ),
+                            dropdownColor: DropdownsBFColor,
                           ),
-                          dropdownColor: Colors.blue,
                         ),
                       ),
                     ),
@@ -929,13 +952,13 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                 Container(
                                   height: DayAxisBreadth,
                                   width: TimeAxisBreadth,
-                                  color: DefaultDayAxisColor,
+                                  color: DayAxisColor,
                                 ),
                                 for (int i = 0; i < daysAxis.length; i++)
                                   Container(
                                       height: DayAxisBreadth,
                                       width: DayAxisUnitLength,
-                                      color: DefaultDayAxisColor,
+                                      color: DayAxisColor,
                                       child: Center(
                                           child: Text(
                                         daysAxis[i],
@@ -957,11 +980,11 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                       Container(
                                           width: TimeAxisBreadth,
                                           height: TimeAxisUnitLength,
-                                          // color: DefaultTimeAxisColor,
+                                          // color: TimeAxisColor,
                                           decoration: BoxDecoration(
-                                            color: DefaultTimeAxisColor,
+                                            color: TimeAxisColor,
                                             // makes the border disappear, nice hack
-                                            border: Border(bottom: BorderSide(color: DefaultTimeAxisColor, width: 0.0)),
+                                            border: Border(bottom: BorderSide(color: TimeAxisColor, width: 0.0)),
                                           ),
                                           child: Center(
                                               child: Text(
@@ -984,7 +1007,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                         Container(
                                           width: DayAxisUnitLength,
                                           height: TimeAxisUnitLength * (timeAxis.length * 1),
-                                          color: DefaultGridColor,
+                                          color: GridColor,
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
@@ -1002,26 +1025,26 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                             deleteTimetableSlot(containerNumber);
                                                           });
                                                         });
-                                                      }
-
-                                                      if (editButtonPressed) {
+                                                      } else if (editButtonPressed) {
                                                         selectedDay = ContainersToPrint[containerNumber].dayString;
                                                         selectedStartTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].startTimeString);
                                                         selectedEndTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].endTimeString);
                                                         enteredCourse = ContainersToPrint[containerNumber].course;
                                                         enteredVenue = ContainersToPrint[containerNumber].venue;
                                                         enteredNotes = ContainersToPrint[containerNumber].notes;
-                                                        selectedColor = ContainersToPrint[containerNumber].color ?? DefaultSlotColor;
+                                                        selectedColor = ContainersToPrint[containerNumber].color ?? SlotColor;
                                                         showEditDialog(context, containerNumber);
-                                                        return;
+                                                      } else if (addButtonPressed) {
+                                                      } else {
+                                                        showViewDialog(context, containerNumber);
                                                       }
                                                     },
                                                     onDoubleTap: () {
-                                                      if (ContainersToPrint[containerNumber].dayString == "") return;
-                                                      if (deleteButtonPressed || addButtonPressed || editButtonPressed) return;
+                                                      // if (ContainersToPrint[containerNumber].dayString == "") return;
+                                                      // if (deleteButtonPressed || addButtonPressed || editButtonPressed) return;
 
-                                                      showViewDialog(context, containerNumber);
-                                                      return;
+                                                      // showViewDialog(context, containerNumber);
+                                                      // return;
                                                     },
                                                     child: Container(
                                                       padding: EdgeInsets.all(5),
@@ -1081,21 +1104,24 @@ class _TimeTablePageState extends State<TimeTablePage> {
                             )
                           ],
                         )))),
+
+            // Edit buttons row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                // Add Button
                 Container(
                   // color: Colors.red,
                   margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
                   decoration: BoxDecoration(
-                    color: addButtonPressed ? Colors.red : Colors.blue,
+                    color: addButtonPressed ? Colors.red : EditButtonsColor,
                     borderRadius: BorderRadius.circular(30), // Adjust the radius
                   ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: addButtonPressed ? Colors.red : Colors.blue,
+                      backgroundColor: addButtonPressed ? Colors.red : EditButtonsColor,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -1116,25 +1142,24 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     },
                     child: Text(
                       addButtonPressed ? "Cancel" : "Add",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Roboto',
-                      ),
+                      style: TextStyle(fontSize: 20, fontFamily: 'Roboto', color: ButtonsTextColor),
                     ),
                   ),
                 ),
+
+                // Edit Button
                 Container(
                   // color: Colors.red,
                   margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
                   decoration: BoxDecoration(
-                    color: editButtonPressed ? Colors.red : Colors.blue,
+                    color: editButtonPressed ? Colors.red : EditButtonsColor,
                     borderRadius: BorderRadius.circular(30), // Adjust the radius
                   ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: editButtonPressed ? Colors.red : Colors.blue,
+                      backgroundColor: editButtonPressed ? Colors.red : EditButtonsColor,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -1150,25 +1175,24 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     },
                     child: Text(
                       editButtonPressed ? "Cancel" : "Edit",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Roboto',
-                      ),
+                      style: TextStyle(fontSize: 20, fontFamily: 'Roboto', color: ButtonsTextColor),
                     ),
                   ),
                 ),
+
+                // Delete Button
                 Container(
                   // color: Colors.red,
                   margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
                   decoration: BoxDecoration(
-                    color: deleteButtonPressed ? Colors.red : Colors.blue,
+                    color: deleteButtonPressed ? Colors.red : EditButtonsColor,
                     borderRadius: BorderRadius.circular(30), // Adjust the radius
                   ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: deleteButtonPressed ? Colors.red : Colors.blue,
+                      backgroundColor: deleteButtonPressed ? Colors.red : EditButtonsColor,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -1184,10 +1208,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     },
                     child: Text(
                       deleteButtonPressed ? "Cancel" : "Delete",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Roboto',
-                      ),
+                      style: TextStyle(fontSize: 20, fontFamily: 'Roboto', color: ButtonsTextColor),
                     ),
                   ),
                 ),
