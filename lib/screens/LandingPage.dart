@@ -46,18 +46,18 @@ class LandingPage extends StatelessWidget {
 
   Future<void> fetchData(BuildContext context) async {
     try {
-      String url = URL + "add_timetable";
-      print(url);
-      final dataToSend = {"faculty": "AI31",
-        "day": "friday",
-        "color": "#FF5733",
-        "start_time": "9:00",
-        "end_time": "12:00",
-        "venue":"LH3 FCSE",
-        "subject":"CS221"};
-      final jsonData = await getterAPIWithDataPOST(url, data: dataToSend);
+      // String url = URL + "add_timetable";
+      // print(url);
+      // final dataToSend = {"faculty": "AI31",
+      //   "day": "friday",
+      //   "color": "#FF5733",
+      //   "start_time": "9:00",
+      //   "end_time": "12:00",
+      //   "venue":"LH3 FCSE",
+      //   "subject":"CS221"};
+      // final jsonData = await getterAPIWithDataPOST(url, data: dataToSend);
 
-      print(jsonData);
+      // print(jsonData);
 
       Navigator.pushReplacement(
         context,
