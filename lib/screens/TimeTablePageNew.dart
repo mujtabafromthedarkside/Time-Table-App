@@ -2,6 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:timetable/config/API_funcs.dart';
+import 'package:timetable/config/config.dart';
+
+import 'LandingPage.dart';
 
 double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 72;
@@ -10,11 +14,26 @@ double TimeAxisBreadth = 60;
 double DayAxisBreadth = 65;
 
 double TimeAxisUnitTime = 30;
+String TimeAxisStartTimeString = "08:00";
+String TimeAxisEndTimeString = "17:30";
+
+int convertTimeToInteger(String time) {
+  int hours = int.parse(time.split(":")[0]);
+  int minutes = int.parse(time.split(":")[1]);
+
+  return hours * 60 + minutes;
+}
+
+int TimeAxisStartTime = convertTimeToInteger(TimeAxisStartTimeString);
+int TimeAxisEndTime = convertTimeToInteger(TimeAxisEndTimeString);
 
 Color DefaultGridColor = Color.fromARGB(255, 81, 157, 251);
-Color DefaultSlotColor = Colors.red;
-Color DefaultDayAxisColor = Color.fromARGB(255, 157, 34, 224);
-Color DefaultTimeAxisColor = Color.fromARGB(255, 248, 47, 255);
+Color DefaultSlotColor = const Color.fromARGB(255, 244, 67, 54);
+Color DefaultDayAxisColor = Color.fromARGB(255, 0, 255, 255);
+Color DefaultTimeAxisColor = Color.fromARGB(255, 0, 255, 255);
+
+String defaultBatchText = "Choose your batch";
+String defaultFacultyText = "Choose your faculty";
 
 Color getRandomColor() {
   Random random = Random();
@@ -94,6 +113,9 @@ class TimetableSlot {
 
     // FOR FUTURE, raise error if dayString not in ["Mon", "Tue", "Wed", "Thu", "Fri"]
     this.dayNumber = ["Mon", "Tue", "Wed", "Thu", "Fri"].indexOf(dayString);
+    if (this.dayNumber == -1) {
+      this.dayNumber = ["monday", "tuesday", "wednesday", "thursday", "friday"].indexOf(dayString);
+    }
     this.calculateLength();
   }
 }
@@ -122,10 +144,45 @@ class _TimeTablePageState extends State<TimeTablePage> {
   bool deleteButtonPressed = false;
   bool editButtonPressed = false;
 
-  String? selectedBatch = 'Choose your batch';
-  String? selectedFaculty = 'Choose your faculty';
+  String selectedBatch = defaultBatchText;
+  String selectedFaculty = defaultFacultyText;
   final List<String> texts = ['Text 1', 'Text 2'];
   final List<String> timeAxis = [];
+
+  Map<String, String> toAddMap(TimetableSlot slot) {
+    return {
+      "faculty": selectedFaculty + selectedBatch,
+      "day": slot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "start_time": slot.startTimeString,
+      "end_time": slot.endTimeString,
+      "venue": slot.venue,
+      "subject": slot.course,
+      "color": slot.color.toString().replaceFirst("Color(0xff", "#").replaceFirst(")", ""), // Also needs to be standardized.
+    };
+  }
+
+  Map<String, String> toDeleteMap(TimetableSlot slot) {
+    return {
+      "faculty": selectedFaculty + selectedBatch,
+      "day": slot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "start_time": slot.startTimeString,
+    };
+  }
+
+  Map<String, String> toEditMap(TimetableSlot newSlot, TimetableSlot oldSlot) {
+    return {
+      "old_day": oldSlot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "old_start_time": oldSlot.startTimeString,
+      
+      "faculty": selectedFaculty + selectedBatch,
+      "day": newSlot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
+      "start_time": newSlot.startTimeString,
+      "end_time": newSlot.endTimeString,
+      "venue": newSlot.venue,
+      "subject": newSlot.course,
+      "color": newSlot.color.toString().replaceFirst("Color(0xff", "#").replaceFirst(")", ""), // Also needs to be standardized.
+    };
+  }
 
   bool insertTimetableSlot(TimetableSlot newSlot) {
     bool LiesInBetween(int x, int a, int b, int state) {
@@ -140,6 +197,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
       }
       return false;
     }
+
+    // if time does not lie in our axis
+    if (!LiesInBetween(newSlot.startTime, TimeAxisStartTime, TimeAxisEndTime, 3)) return false;
+    if (!LiesInBetween(newSlot.endTime, TimeAxisStartTime, TimeAxisEndTime, 3)) return false;
 
     int insertIndex = -1;
     bool indexFound = false;
@@ -208,8 +269,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
       ContainersToPrint.remove(ContainersToPrint[containerNumber - 1]);
     }
   }
-
-  void addTimetableSlot() {}
 
   @override
   void initState() {
@@ -308,7 +367,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
     String hours = (time ~/ 60).toString();
     String minutes = (time % 60).toString();
 
-    return "$hours:${minutes.length == 1 ? "0$minutes": minutes}";
+    return "$hours:${minutes.length == 1 ? "0$minutes" : minutes}";
   }
 
   Future<void> showViewDialog(BuildContext context, int containerNumber) async {
@@ -356,10 +415,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     ),
                     Text("Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                     Text(ContainersToPrint[containerNumber].venue, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
-                    if(ContainersToPrint[containerNumber].notes != "")
-                      Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    if(ContainersToPrint[containerNumber].notes != "")
-                      Text(ContainersToPrint[containerNumber].notes, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+                    if (ContainersToPrint[containerNumber].notes != "") Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    if (ContainersToPrint[containerNumber].notes != "") Text(ContainersToPrint[containerNumber].notes, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
                   ]))));
         });
   }
@@ -406,47 +463,47 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
                     child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: 180,
-                      ),
-                      width: 180,
+                      width: 150,
                       decoration: BoxDecoration(
                         color: Colors.white, // Set the background color
                         borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DropdownButton<String>(
-                          selectedItemBuilder: (BuildContext context) {
-                            return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                              return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
-                            }).toList();
-                          },
-                          items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Center(
-                                  child: Text(
-                                value,
-                                // textAlign: TextAlign.center,
-                              )),
-                            );
-                          }).toList(),
-                          onChanged: (String? value) => setState(() {
-                            selectedDay = value ?? "";
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            selectedItemBuilder: (BuildContext context) {
+                              return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                                return Center(child: Text(value, style: TextStyle(color: Colors.black)));
+                              }).toList();
+                            },
+                            items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Center(
+                                    child: Text(
+                                  value,
+                                  // textAlign: TextAlign.center,
+                                )),
+                              );
+                            }).toList(),
+                            onChanged: (String? value) => setState(() {
+                              selectedDay = value ?? "";
 
-                            UpdateValuesAndReopen();
-                          }),
-                          value: selectedDay,
-                          icon: const Icon(Icons.arrow_downward), // Custom icon
-                          iconSize: 20, // Set icon size
-                          elevation: 0, // Dropdown menu elevation
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontFamily: 'Roboto',
+                              UpdateValuesAndReopen();
+                            }),
+                            value: selectedDay,
+                            icon: const Icon(Icons.arrow_downward), // Custom icon
+                            iconSize: 20, // Set icon size
+                            elevation: 0, // Dropdown menu elevation
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontFamily: 'Roboto',
+                            ),
+                            dropdownColor: Colors.white,
                           ),
-                          dropdownColor: Colors.white,
                         ),
                       ),
                     ),
@@ -533,7 +590,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         availableColors: [
                           Color.fromARGB(255, 255, 159, 152),
                           Color.fromARGB(255, 242, 86, 75),
-                          Colors.red,
+                          const Color.fromARGB(255, 244, 67, 54),
                           Color.fromARGB(255, 197, 13, 0),
                           Color.fromARGB(255, 157, 245, 160),
                           Color.fromARGB(255, 80, 236, 85),
@@ -541,7 +598,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                           Color.fromARGB(255, 28, 138, 31),
                           Color.fromARGB(255, 157, 207, 249),
                           Color.fromARGB(255, 82, 160, 225),
-                          Colors.blue,
+                          const Color.fromARGB(255, 33, 150, 243),
                           Color.fromARGB(255, 11, 108, 188),
                           Color.fromARGB(255, 255, 247, 176),
                           Color.fromARGB(255, 255, 241, 118),
@@ -550,15 +607,15 @@ class _TimeTablePageState extends State<TimeTablePage> {
                           Color.fromARGB(255, 255, 216, 156),
                           Color.fromARGB(255, 255, 192, 96),
                           Color.fromARGB(255, 255, 177, 60),
-                          Colors.orange,
+                          const Color.fromARGB(255, 255, 152, 0),
                           Color.fromARGB(255, 241, 160, 255),
                           Color.fromARGB(255, 206, 68, 231),
                           Color.fromARGB(255, 178, 42, 202),
                           Color.fromARGB(255, 159, 1, 187),
-                          Colors.white,
-                          Colors.grey.shade400,
-                          Colors.grey.shade700,
-                          Colors.blueGrey.shade700,
+                          const Color.fromRGBO(255, 255, 255, 1),
+                          const Color.fromRGBO(189, 189, 189, 1),
+                          const Color.fromRGBO(97, 97, 97, 1),
+                          const Color.fromRGBO(69, 90, 100, 1),
                         ],
                       ),
                     ),
@@ -631,9 +688,23 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     return;
                 } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
-                setState(() {
-                  updateContainersToPrint();
-                });
+                if (editingON) {
+                  contactDatabase(context, 'update_timetable', toEditMap(newSlot, oldSlot)).then((returnStatus) {
+                    if (returnStatus.isEmpty) return;
+
+                    setState(() {
+                      updateContainersToPrint();
+                    });
+                  });
+                } else {
+                  contactDatabase(context, 'add_timetable', toAddMap(newSlot)).then((returnStatus) {
+                    if (returnStatus.isEmpty) return;
+
+                    setState(() {
+                      updateContainersToPrint();
+                    });
+                  });
+                }
 
                 print('Typed text course: ${textControllerCourse.text}');
                 print('Typed text venue: ${textControllerVenue.text}');
@@ -653,6 +724,18 @@ class _TimeTablePageState extends State<TimeTablePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Time Table"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Handle back button press here
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LandingPage(),
+              ),
+            );
+          },
+        ),
       ),
       body: Center(
         child: Column(
@@ -662,113 +745,141 @@ class _TimeTablePageState extends State<TimeTablePage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // Batch Dropdown
                   Container(
-                    constraints: BoxConstraints(
-                      maxWidth: 180,
-                    ),
-                    width: 180,
+                    width: 160,
                     decoration: BoxDecoration(
                       color: Colors.blue, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: DropdownButton<String>(
-                        selectedItemBuilder: (BuildContext context) {
-                          return <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
-                            // return Center(
-                            //   child: Text(
-                            //     value,
-                            //     // textAlign: TextAlign.center,
-                            //   )
-                            // );
-                            return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
-                          }).toList();
-                        },
-                        items: <String>['Choose your batch', '33', '32', '31', '30', '29'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Center(
-                                child: Text(
-                              value,
-                              // textAlign: TextAlign.center,
-                            )),
-                          );
-                        }).toList(),
-                        // value: selectedOption,
-                        // onChanged: (newValue) {
-                        //   setState(() {
-                        //     selectedOption = newValue;
-                        //   });
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          selectedItemBuilder: (BuildContext context) {
+                            return <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
+                              // return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
+                              return Center(child: Text(value, style: TextStyle(color: Colors.black, fontSize: 14)));
+                            }).toList();
+                          },
+                          items: <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Center(
+                                  child: Text(
+                                value,
+                                // textAlign: TextAlign.center,
+                              )),
+                            );
+                          }).toList(),
+                          // value: selectedOption,
+                          // onChanged: (newValue) {
+                          //   setState(() {
+                          //     selectedOption = newValue;
+                          //   });
 
-                        // },
-                        onChanged: (String? value) => setState(() {
-                          selectedBatch = value ?? "";
-                        }),
-                        value: selectedBatch,
-                        // onChanged: (_){},
-                        // hint: const Text('Choose your batch'),
+                          // },
+                          onChanged: (String? value) {
+                            setState(() {
+                              selectedBatch = value ?? "";
+                            });
 
-                        icon: const Icon(Icons.arrow_downward), // Custom icon
-                        iconSize: 20, // Set icon size
-                        elevation: 0, // Dropdown menu elevation
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontFamily: 'Roboto',
+                            if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
+                              String faculty = selectedFaculty + selectedBatch;
+
+                              Map<String, String> dataToSend = {"faculty": faculty};
+
+                              contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
+                                setState(() {
+                                  ReadTimetable(receivedTimetable);
+                                });
+                              });
+                            }
+                          },
+                          value: selectedBatch,
+                          // onChanged: (_){},
+                          // hint: const Text(defaultBatchText),
+
+                          icon: const Icon(Icons.arrow_downward), // Custom icon
+                          iconSize: 20, // Set icon size
+                          elevation: 0, // Dropdown menu elevation
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontFamily: 'Roboto',
+                          ),
+                          dropdownColor: Colors.blue,
                         ),
-                        dropdownColor: Colors.blue,
                       ),
                     ),
                   ),
+
+                  // Faculty Dropdown
                   Container(
-                    constraints: BoxConstraints(
-                      maxWidth: 180,
-                    ),
-                    width: 180,
+                    width: 160,
                     decoration: BoxDecoration(
                       color: Colors.blue, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: DropdownButton<String>(
-                        selectedItemBuilder: (BuildContext context) {
-                          return <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
-                            return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
-                          }).toList();
-                        },
-                        items: <String>['Choose your faculty', 'AI', 'CS', 'ME'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Center(
-                                child: Text(
-                              value,
-                              // textAlign: TextAlign.center,
-                            )),
-                          );
-                        }).toList(),
-                        onChanged: (String? value) => setState(() {
-                          selectedFaculty = value ?? "";
-                        }),
-                        value: selectedFaculty,
-                        icon: const Icon(Icons.arrow_downward), // Custom icon
-                        iconSize: 20, // Set icon size
-                        elevation: 0, // Dropdown menu elevation
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontFamily: 'Roboto',
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          selectedItemBuilder: (BuildContext context) {
+                            return <String>[defaultFacultyText, 'AI', 'CS', 'ME'].map((String value) {
+                              return Center(child: Text(value, style: TextStyle(color: Colors.black, fontSize: 14)));
+                            }).toList();
+                          },
+                          items: <String>[defaultFacultyText, 'AI', 'CS', 'ME'].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Center(
+                                  child: Text(
+                                value,
+                                // textAlign: TextAlign.center,
+                              )),
+                            );
+                          }).toList(),
+                          onChanged: (String? value) {
+                            setState(() {
+                              selectedFaculty = value ?? "";
+                            });
+
+                            if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
+                              String faculty = selectedFaculty + selectedBatch;
+
+                              Map<String, String> dataToSend = {"faculty": faculty};
+
+                              contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
+                                setState(() {
+                                  ReadTimetable(receivedTimetable);
+                                });
+                              });
+                            }
+                          },
+                          value: selectedFaculty,
+                          icon: const Icon(Icons.arrow_downward), // Custom icon
+                          iconSize: 20, // Set icon size
+                          elevation: 0, // Dropdown menu elevation
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontFamily: 'Roboto',
+                          ),
+                          dropdownColor: Colors.blue,
                         ),
-                        dropdownColor: Colors.blue,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
+
+            // Timetable
             Expanded(
                 child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
@@ -848,11 +959,15 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                   GestureDetector(
                                                     onTap: () {
                                                       if (ContainersToPrint[containerNumber].dayString == "") return;
+
                                                       if (deleteButtonPressed) {
-                                                        setState(() {
-                                                          deleteTimetableSlot(containerNumber);
+                                                        contactDatabase(context, 'delete_timetable', toDeleteMap(ContainersToPrint[containerNumber])).then((returnStatus) {
+                                                          if (returnStatus.isEmpty) return;
+
+                                                          setState(() {
+                                                            deleteTimetableSlot(containerNumber);
+                                                          });
                                                         });
-                                                        return;
                                                       }
 
                                                       if (editButtonPressed) {
@@ -1048,5 +1163,57 @@ class _TimeTablePageState extends State<TimeTablePage> {
         ),
       ),
     );
+  }
+
+  /// Construct a color from a hex code string, of the format #RRGGBB.
+  Color hexToColor(String code) {
+    return Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
+  }
+
+  ReadTimetable(Map<String, dynamic> Data) {
+    TimetableSlots.clear();
+
+    Data.forEach((day, slot) {
+      if (slot == "")
+        ;
+      else {
+        slot.forEach((startTime, remainingSlot) {
+          insertTimetableSlot(TimetableSlot.FromStrings(
+              startTime,
+              remainingSlot["end_time"],
+              day,
+              remainingSlot["subject"],
+              remainingSlot["venue"],
+              // remainingSlot["notes"],
+              "",
+              hexToColor(remainingSlot["color"])));
+        });
+      }
+    });
+
+    updateContainersToPrint();
+  }
+
+  Future<Map<String, dynamic>> contactDatabase(BuildContext context, String suffixAPI, Map<String, String> dataToSend) async {
+    try {
+      String url = URL + suffixAPI;
+      print(url);
+      // final dataToSend = {
+      //   "faculty": "AI31",
+      //   "day": "friday",
+      //   "color": "#FF5733",
+      //   "start_time": "9:00",
+      //   "end_time": "12:00",
+      //   "venue": "LH3 FCSE",
+      //   "subject": "CS221"
+      // };
+      final jsonData = await getterAPIWithDataPOST(url, data: dataToSend);
+      print(jsonData);
+      return jsonData;
+    } catch (e) {
+      // Handle any errors that occur during the API requests.
+      print('Error: $e');
+      return {};
+    }
   }
 }
