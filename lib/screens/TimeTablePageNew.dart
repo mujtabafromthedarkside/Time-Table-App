@@ -20,10 +20,17 @@ Color DayAxisColor = LandingPageDarkBlue;
 Color TimeAxisColor = LandingPageDarkBlue;
 Color DropdownsBFColor = LandingPageBrightYellow; // Batch, Faculty Color
 Color EditButtonsColor = LandingPageBrightYellow;
+Color EditDialogButtonsColor = LandingPageBrightYellow;
+Color CancelColor = Colors.red;
 
 Color DropdownsTextColor = Colors.white;
 Color ButtonsTextColor = Colors.white;
+Color GridTextColor = Colors.black;
 Color AppBarTextColor = Colors.white;
+Color EditDialogTextColor = Colors.white;
+
+double ButtonsWidth = 90;
+double DropdownsBFWidth = 150;
 
 double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 72;
@@ -45,8 +52,8 @@ int convertTimeToInteger(String time) {
 int TimeAxisStartTime = convertTimeToInteger(TimeAxisStartTimeString);
 int TimeAxisEndTime = convertTimeToInteger(TimeAxisEndTimeString);
 
-String defaultBatchText = "Choose your batch";
-String defaultFacultyText = "Choose your faculty";
+String defaultBatchText = "Choose batch";
+String defaultFacultyText = "Choose faculty";
 
 Color getRandomColor() {
   Random random = Random();
@@ -391,10 +398,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
               backgroundColor: ContainersToPrint[containerNumber].color,
               title: Text(
                 ContainersToPrint[containerNumber].course + " - " + ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"][ContainersToPrint[containerNumber].dayNumber],
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  // fontSize: 20,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, color: GridTextColor
+                    // fontSize: 20,
+                    ),
               ),
               content: Container(
                   // height: 300,
@@ -410,26 +416,27 @@ class _TimeTablePageState extends State<TimeTablePage> {
                       children: [
                         Column(
                           children: [
-                            Text("Start Time", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            Text("Start Time", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: GridTextColor)),
                             Container(
-                              child: Text(ContainersToPrint[containerNumber].startTimeString, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
+                              child: Text(ContainersToPrint[containerNumber].startTimeString, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18, color: GridTextColor)),
                             ),
                           ],
                         ),
                         Column(
                           children: [
-                            Text("End Time", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            Text("End Time", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: GridTextColor)),
                             Container(
-                              child: Text(ContainersToPrint[containerNumber].endTimeString, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
+                              child: Text(ContainersToPrint[containerNumber].endTimeString, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18, color: GridTextColor)),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    Text("Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text(ContainersToPrint[containerNumber].venue, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18)),
-                    if (ContainersToPrint[containerNumber].notes != "") Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    if (ContainersToPrint[containerNumber].notes != "") Text(ContainersToPrint[containerNumber].notes, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+                    Text("Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: GridTextColor)),
+                    Text(ContainersToPrint[containerNumber].venue, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18, color: GridTextColor)),
+                    if (ContainersToPrint[containerNumber].notes != "") Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: GridTextColor)),
+                    if (ContainersToPrint[containerNumber].notes != "")
+                      Text(ContainersToPrint[containerNumber].notes, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16, color: GridTextColor)),
                   ]))));
         });
   }
@@ -462,8 +469,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text('Enter Details'),
+          backgroundColor: LandingPageDarkBlue,
+          title: Text('Enter Details', style: TextStyle(color: EditDialogTextColor)),
           content: Container(
             // height: 300,
             // width: 300,
@@ -478,7 +485,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     child: Container(
                       width: 150,
                       decoration: BoxDecoration(
-                        color: Colors.white, // Set the background color
+                        color: DropdownsBFColor, // Set the background color
                         borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                       ),
                       child: Center(
@@ -489,7 +496,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                               isExpanded: true,
                               selectedItemBuilder: (BuildContext context) {
                                 return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                                  return Center(child: Text(value, style: TextStyle(color: Colors.black)));
+                                  return Center(child: Text(value, style: TextStyle(color: EditDialogTextColor)));
                                 }).toList();
                               },
                               items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
@@ -498,25 +505,26 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                   child: Center(
                                       child: Text(
                                     value,
+                                    style: TextStyle(color: EditDialogTextColor, fontWeight: (value == "Day" ? FontWeight.bold : FontWeight.normal)),
                                     // textAlign: TextAlign.center,
                                   )),
                                 );
                               }).toList(),
                               onChanged: (String? value) => setState(() {
                                 selectedDay = value ?? "";
-                            
+
                                 UpdateValuesAndReopen();
                               }),
                               value: selectedDay,
-                              icon: const Icon(Icons.arrow_downward), // Custom icon
+                              icon: Icon(Icons.arrow_downward, color: EditDialogTextColor), // Custom icon
                               iconSize: 20, // Set icon size
                               elevation: 0, // Dropdown menu elevation
-                              style: const TextStyle(
-                                color: Colors.black,
+                              style: TextStyle(
+                                color: EditDialogTextColor,
                                 fontSize: 16,
                                 fontFamily: 'Roboto',
                               ),
-                              dropdownColor: Colors.white,
+                              dropdownColor: DropdownsBFColor,
                             ),
                           ),
                         ),
@@ -528,51 +536,85 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     children: [
                       Column(
                         children: [
-                          Text("Start Time"),
-                          ElevatedButton(
-                            child: Text(selectedStartTimeInDialogBox),
-                            onPressed: () async {
-                              // Show the time picker dialog
-                              final TimeOfDay? selectedTime = await showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay.now(),
-                              );
+                          Text("Start Time", style: TextStyle(fontWeight: FontWeight.normal)),
+                          Container(
+                            width: 110,
+                            child: ElevatedButton(
+                              child: Text(selectedStartTimeInDialogBox),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: EditDialogButtonsColor,
+                                foregroundColor: EditDialogTextColor,
+                              ),
+                              onPressed: () async {
+                                // Show the time picker dialog
+                                final TimeOfDay? selectedTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                  builder: (BuildContext context, Widget? child) {
+                                    return Theme(
+                                      data: ThemeData.light().copyWith(
+                                        primaryColor: LandingPageBrightYellow, // Set your desired primary color
+                                        colorScheme: ColorScheme.light(primary: LandingPageBrightYellow),
+                                        buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary, buttonColor: LandingPageBrightYellow),
+                                      ),
+                                      child: child!,
+                                    );
+                                  },
+                                );
 
-                              // Do something with the selected time
-                              if (selectedTime != null) {
-                                print("setState called");
-                                // setState(() {
-                                selectedStartTimeInDialogBox = selectedTime.format(context);
-                                // });
-                              }
+                                // Do something with the selected time
+                                if (selectedTime != null) {
+                                  print("setState called");
+                                  // setState(() {
+                                  selectedStartTimeInDialogBox = selectedTime.format(context);
+                                  // });
+                                }
 
-                              UpdateValuesAndReopen();
-                            },
+                                UpdateValuesAndReopen();
+                              },
+                            ),
                           ),
                         ],
                       ),
                       Column(
                         children: [
-                          Text("End Time"),
-                          ElevatedButton(
-                            child: Text(selectedEndTimeInDialogBox),
-                            onPressed: () async {
-                              // Show the time picker dialog
-                              final TimeOfDay? selectedTime = await showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay.now(),
-                              );
+                          Text("End Time", style: TextStyle(fontWeight: FontWeight.normal)),
+                          Container(
+                            width: 110,
+                            child: ElevatedButton(
+                              child: Text(selectedEndTimeInDialogBox),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: EditDialogButtonsColor,
+                                foregroundColor: EditDialogTextColor,
+                              ),
+                              onPressed: () async {
+                                // Show the time picker dialog
+                                final TimeOfDay? selectedTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                  builder: (BuildContext context, Widget? child) {
+                                    return Theme(
+                                      data: ThemeData.light().copyWith(
+                                        primaryColor: LandingPageBrightYellow, // Set your desired primary color
+                                        colorScheme: ColorScheme.light(primary: LandingPageBrightYellow),
+                                        buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary, buttonColor: LandingPageBrightYellow),
+                                      ),
+                                      child: child!,
+                                    );
+                                  },
+                                );
 
-                              // Do something with the selected time
-                              if (selectedTime != null) {
-                                print("setState called");
-                                // setState(() {
-                                selectedEndTimeInDialogBox = selectedTime.format(context);
-                                // });
-                              }
+                                // Do something with the selected time
+                                if (selectedTime != null) {
+                                  print("setState called");
+                                  // setState(() {
+                                  selectedEndTimeInDialogBox = selectedTime.format(context);
+                                  // });
+                                }
 
-                              UpdateValuesAndReopen();
-                            },
+                                UpdateValuesAndReopen();
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -580,18 +622,24 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   ),
                   TextField(
                     controller: textControllerCourse,
-                    decoration: InputDecoration(labelText: 'Enter Course:', hintText: 'ES324'),
+                    decoration: InputDecoration(
+                        labelText: 'Enter Course:', labelStyle: TextStyle(color: Colors.grey), hintText: 'ES324', hintStyle: TextStyle(color: Colors.grey[300], fontWeight: FontWeight.normal)),
                   ),
                   SizedBox(height: 10),
                   TextField(
                     controller: textControllerVenue,
-                    decoration: InputDecoration(labelText: 'Enter Venue:', hintText: 'ACB MLH'),
+                    decoration: InputDecoration(
+                        labelText: 'Enter Venue:', labelStyle: TextStyle(color: Colors.grey), hintText: 'ACB MLH', hintStyle: TextStyle(color: Colors.grey[300], fontWeight: FontWeight.normal)),
                   ),
                   SizedBox(height: 10),
                   TextField(
                     maxLines: 2,
                     controller: textControllerNotes,
-                    decoration: InputDecoration(labelText: 'Enter Notes:', hintText: 'Quiz in this class'),
+                    decoration: InputDecoration(
+                        labelText: 'Enter Notes:',
+                        labelStyle: TextStyle(color: Colors.grey),
+                        hintText: 'Quiz in this class',
+                        hintStyle: TextStyle(color: Colors.grey[300], fontWeight: FontWeight.normal)),
                   ),
                   SizedBox(height: 10),
                   Container(
@@ -640,93 +688,109 @@ class _TimeTablePageState extends State<TimeTablePage> {
             ),
           ),
           actions: [
-            ElevatedButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                // UI choice. Do we always want to restore previous values on cancel? Or only when we manually entered them?
-                // if(!editingON)
-                UpdateValues();
+            Container(
+              margin: EdgeInsets.only(right: 5),
+              width: 80,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: EditDialogButtonsColor,
+                  padding: EdgeInsets.all(0),
+                ),
+                child: Text('Cancel', style: TextStyle(color: GridTextColor)),
+                onPressed: () {
+                  // UI choice. Do we always want to restore previous values on cancel? Or only when we manually entered them?
+                  // if(!editingON)
+                  UpdateValues();
 
-                // close the dialog
-                Navigator.of(context).pop();
-                // ResetDialogBoxValues();
-              },
+                  // close the dialog
+                  Navigator.of(context).pop();
+                  // ResetDialogBoxValues();
+                },
+              ),
             ),
-            ElevatedButton(
-              child: Text('OK'),
-              onPressed: () {
-                // NOTE: Show WARNINGS HERE
-                if (selectedDay == "Day") return;
+            Container(
+              margin: EdgeInsets.only(left: 5),
+              width: 80,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: EditDialogButtonsColor,
+                  padding: EdgeInsets.all(0),
+                ),
+                child: Text('OK', style: TextStyle(color: GridTextColor)),
+                onPressed: () {
+                  // NOTE: Show WARNINGS HERE
+                  if (selectedDay == "Day") return;
 
-                int selectedStartTime = convertTimeToInteger(convertTimeTo24Hours(selectedStartTimeInDialogBox));
-                int selectedEndTime = convertTimeToInteger(convertTimeTo24Hours(selectedEndTimeInDialogBox));
-                if (selectedStartTime >= selectedEndTime) return;
+                  int selectedStartTime = convertTimeToInteger(convertTimeTo24Hours(selectedStartTimeInDialogBox));
+                  int selectedEndTime = convertTimeToInteger(convertTimeTo24Hours(selectedEndTimeInDialogBox));
+                  if (selectedStartTime >= selectedEndTime) return;
 
-                // Make sure the time is between 8:00 AM and 5:30 PM
-                // NOTE: Make constants her
-                if (selectedStartTime < 480 || selectedEndTime > 1050) return;
+                  // Make sure the time is between 8:00 AM and 5:30 PM
+                  // NOTE: Make constants her
+                  if (selectedStartTime < 480 || selectedEndTime > 1050) return;
 
-                // Handle the input and close the dialog
-                TimetableSlot newSlot = TimetableSlot.Empty();
-                late TimetableSlot oldSlot;
-                bool editingON = (containerNumber != -1);
-                if (editingON) {
-                  oldSlot = TimetableSlot.Copy(ContainersToPrint[containerNumber]);
-                }
+                  // Handle the input and close the dialog
+                  TimetableSlot newSlot = TimetableSlot.Empty();
+                  late TimetableSlot oldSlot;
+                  bool editingON = (containerNumber != -1);
+                  if (editingON) {
+                    oldSlot = TimetableSlot.Copy(ContainersToPrint[containerNumber]);
+                  }
 
-                newSlot.course = textControllerCourse.text.toUpperCase();
-                newSlot.venue = textControllerVenue.text.toUpperCase();
-                newSlot.notes = textControllerNotes.text;
+                  newSlot.course = textControllerCourse.text.toUpperCase();
+                  newSlot.venue = textControllerVenue.text.toUpperCase();
+                  newSlot.notes = textControllerNotes.text;
 
-                newSlot.dayString = selectedDay;
-                newSlot.startTimeString = convertTimeToString(selectedStartTime);
-                newSlot.endTimeString = convertTimeToString(selectedEndTime);
+                  newSlot.dayString = selectedDay;
+                  newSlot.startTimeString = convertTimeToString(selectedStartTime);
+                  newSlot.endTimeString = convertTimeToString(selectedEndTime);
 
-                newSlot.calculateValues();
+                  newSlot.calculateValues();
 
-                // NOTE: Take care of this above.
-                // NOT SURE ABOUT THIS CONDITION
-                if (selectedColor != SlotColor) {
-                  newSlot.color = selectedColor;
-                }
+                  // NOTE: Take care of this above.
+                  // NOT SURE ABOUT THIS CONDITION
+                  if (selectedColor != SlotColor) {
+                    newSlot.color = selectedColor;
+                  }
 
-                if (editingON) {
-                  deleteTimetableSlot(containerNumber);
-                }
+                  if (editingON) {
+                    deleteTimetableSlot(containerNumber);
+                  }
 
-                if (insertTimetableSlot(newSlot) == false) {
-                  print("CLASH: ${newSlot.course} on ${newSlot.dayString} has clash btw ${newSlot.startTime} and ${newSlot.endTime}.");
+                  if (insertTimetableSlot(newSlot) == false) {
+                    print("CLASH: ${newSlot.course} on ${newSlot.dayString} has clash btw ${newSlot.startTime} and ${newSlot.endTime}.");
 
-                  if (editingON)
-                    insertTimetableSlot(oldSlot);
-                  else
-                    return;
-                } // WILL NOT RETURN IF editingON because it needs to update Containers below.
+                    if (editingON)
+                      insertTimetableSlot(oldSlot);
+                    else
+                      return;
+                  } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
-                if (editingON) {
-                  contactDatabase(context, 'update_timetable', toEditMap(newSlot, oldSlot)).then((returnStatus) {
-                    if (returnStatus.isEmpty) return;
+                  if (editingON) {
+                    contactDatabase(context, 'update_timetable', toEditMap(newSlot, oldSlot)).then((returnStatus) {
+                      if (returnStatus.isEmpty) return;
 
-                    setState(() {
-                      updateContainersToPrint();
+                      setState(() {
+                        updateContainersToPrint();
+                      });
                     });
-                  });
-                } else {
-                  contactDatabase(context, 'add_timetable', toAddMap(newSlot)).then((returnStatus) {
-                    if (returnStatus.isEmpty) return;
+                  } else {
+                    contactDatabase(context, 'add_timetable', toAddMap(newSlot)).then((returnStatus) {
+                      if (returnStatus.isEmpty) return;
 
-                    setState(() {
-                      updateContainersToPrint();
+                      setState(() {
+                        updateContainersToPrint();
+                      });
                     });
-                  });
-                }
+                  }
 
-                print('Typed text course: ${textControllerCourse.text}');
-                print('Typed text venue: ${textControllerVenue.text}');
-                print('Typed text notes: ${textControllerNotes.text}');
-                Navigator.of(context).pop();
-                ResetDialogBoxValues();
-              },
+                  print('Typed text course: ${textControllerCourse.text}');
+                  print('Typed text venue: ${textControllerVenue.text}');
+                  print('Typed text notes: ${textControllerNotes.text}');
+                  Navigator.of(context).pop();
+                  ResetDialogBoxValues();
+                },
+              ),
             ),
           ],
         );
@@ -734,6 +798,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
     );
   }
 
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -741,7 +806,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
       drawer: SideBar(),
       appBar: AppBar(
         backgroundColor: LandingPageDarkBlue,
-        title: const Text("Time Table App"),
+        title: Text("Time Table App", style: TextStyle(color: AppBarTextColor)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppBarTextColor),
@@ -757,7 +822,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
         ),
         actions: [
           Padding(
-            padding:  EdgeInsets.only(right: 8.0),
+            padding: EdgeInsets.only(right: 8.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
@@ -799,74 +864,79 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 children: [
                   // Batch Dropdown
                   Container(
-                    width: 160,
+                    width: DropdownsBFWidth,
                     decoration: BoxDecoration(
                       color: LandingPageBrightYellow, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                       // Set decoration to null or an empty BoxDecoration to remove the border
                       // decoration: null,
-                      border: Border.all(width: 2, color: Colors.transparent),
+                      border: Border.all(width: 0, color: Colors.transparent),
                     ),
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            selectedItemBuilder: (BuildContext context) {
-                              return <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
-                                // return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
-                                return Center(child: Text(value, style: TextStyle(color: DropdownsTextColor, fontSize: 14)));
-                              }).toList();
-                            },
-                            items: <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Center(
-                                    child: Text(
-                                  value,
-                                  style: TextStyle(color: DropdownsTextColor),
-                                  // textAlign: TextAlign.center,
-                                )),
-                              );
-                            }).toList(),
-                            // value: selectedOption,
-                            // onChanged: (newValue) {
-                            //   setState(() {
-                            //     selectedOption = newValue;
-                            //   });
+                        // padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        padding: EdgeInsets.fromLTRB(24, 0, 4, 0),
+                        child: Theme(
+                          data: Theme.of(context).copyWith(canvasColor: Colors.green[300]),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              selectedItemBuilder: (BuildContext context) {
+                                return <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
+                                  // return SizedBox(width: 152, child: Center(child: Text(value, style: TextStyle(color: Colors.black))));
+                                  return Center(child: Text(value, style: TextStyle(color: DropdownsTextColor, fontSize: 14)));
+                                }).toList();
+                              },
+                              items: <String>[defaultBatchText, '33', '32', '31', '30', '29'].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Center(
+                                      child: Text(
+                                    value,
+                                    style: TextStyle(color: DropdownsTextColor, fontWeight: (value == defaultBatchText ? FontWeight.bold : FontWeight.normal)),
+                                    // textAlign: TextAlign.center,
+                                  )),
+                                );
+                              }).toList(),
+                              // value: selectedOption,
+                              // onChanged: (newValue) {
+                              //   setState(() {
+                              //     selectedOption = newValue;
+                              //   });
 
-                            // },
-                            onChanged: (String? value) {
-                              setState(() {
-                                selectedBatch = value ?? "";
-                              });
-
-                              if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
-                                String faculty = selectedFaculty + selectedBatch;
-
-                                Map<String, String> dataToSend = {"faculty": faculty};
-
-                                contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
-                                  setState(() {
-                                    ReadTimetable(receivedTimetable);
-                                  });
+                              // },
+                              onChanged: (String? value) {
+                                setState(() {
+                                  selectedBatch = value ?? "";
                                 });
-                              }
-                            },
-                            value: selectedBatch,
-                            // onChanged: (_){},
-                            // hint: const Text(defaultBatchText),
 
-                            icon: Icon(Icons.arrow_downward, color: DropdownsTextColor), // Custom icon
-                            iconSize: 20, // Set icon size
-                            elevation: 0, // Dropdown menu elevation
-                            style: TextStyle(
-                              color: DropdownsTextColor,
-                              fontSize: 16,
-                              fontFamily: 'Roboto',
+                                if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
+                                  String faculty = selectedFaculty + selectedBatch;
+
+                                  Map<String, String> dataToSend = {"faculty": faculty};
+
+                                  contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
+                                    setState(() {
+                                      ReadTimetable(receivedTimetable);
+                                    });
+                                  });
+                                }
+                              },
+                              value: selectedBatch,
+                              // onChanged: (_){},
+                              // hint: const Text(defaultBatchText),
+
+                              icon: Icon(Icons.arrow_downward, color: DropdownsTextColor), // Custom icon
+                              iconSize: 20, // Set icon size
+                              elevation: 0, // Dropdown menu elevation
+                              style: TextStyle(
+                                color: DropdownsTextColor,
+                                fontSize: 14,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.normal,
+                              ),
+                              dropdownColor: Color.fromARGB(250, 233, 161, 26),
                             ),
-                            dropdownColor: LandingPageBrightYellow,
                           ),
                         ),
                       ),
@@ -875,14 +945,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
                   // Faculty Dropdown
                   Container(
-                    width: 160,
+                    width: DropdownsBFWidth,
                     decoration: BoxDecoration(
                       color: LandingPageBrightYellow, // Set the background color
                       borderRadius: BorderRadius.circular(30), // Optional: Set border radius
                     ),
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        padding: EdgeInsets.fromLTRB(24, 0, 4, 0),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             isExpanded: true,
@@ -895,21 +965,23 @@ class _TimeTablePageState extends State<TimeTablePage> {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Center(
-                                    child: Text(value
-                                        // textAlign: TextAlign.center,
-                                        )),
+                                    child: Text(
+                                  value,
+                                  style: TextStyle(color: DropdownsTextColor, fontWeight: (value == defaultFacultyText ? FontWeight.bold : FontWeight.normal)),
+                                  // textAlign: TextAlign.center,
+                                )),
                               );
                             }).toList(),
                             onChanged: (String? value) {
                               setState(() {
                                 selectedFaculty = value ?? "";
                               });
-                          
+
                               if (selectedFaculty != defaultFacultyText && selectedBatch != defaultBatchText) {
                                 String faculty = selectedFaculty + selectedBatch;
-                          
+
                                 Map<String, String> dataToSend = {"faculty": faculty};
-                          
+
                                 contactDatabase(context, 'get_timetable', dataToSend).then((receivedTimetable) {
                                   setState(() {
                                     ReadTimetable(receivedTimetable);
@@ -923,10 +995,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
                             elevation: 0, // Dropdown menu elevation
                             style: TextStyle(
                               color: DropdownsTextColor,
-                              fontSize: 16,
+                              fontSize: 14,
                               fontFamily: 'Roboto',
                             ),
-                            dropdownColor: DropdownsBFColor,
+                            dropdownColor: Color.fromARGB(250, 233, 161, 26),
                           ),
                         ),
                       ),
@@ -938,172 +1010,187 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
             // Timetable
             Expanded(
-                child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start, // Align horizontally to the start (left)
-                          children: [
-                            // DAY AXIS
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Container(
-                                  height: DayAxisBreadth,
-                                  width: TimeAxisBreadth,
-                                  color: DayAxisColor,
-                                ),
-                                for (int i = 0; i < daysAxis.length; i++)
-                                  Container(
-                                      height: DayAxisBreadth,
-                                      width: DayAxisUnitLength,
-                                      color: DayAxisColor,
-                                      child: Center(
-                                          child: Text(
-                                        daysAxis[i],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ))),
-                              ],
-                            ),
+                child: isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          // Set the color of the spinner
+                          valueColor: AlwaysStoppedAnimation<Color>(DropdownsTextColor),
 
-                            // ALL BELOW DAY AXIS
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          // Set the strokeWidth (thickness of the spinner)
+                          strokeWidth: 4.0,
+
+                          // Set the background color of the spinner
+                          backgroundColor: DropdownsBFColor,
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start, // Align horizontally to the start (left)
                               children: [
-                                // TIME AXIS
-                                Column(
+                                // DAY AXIS
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    for (int i = 0; i < timeAxis.length; i++)
+                                    Container(
+                                      height: DayAxisBreadth,
+                                      width: TimeAxisBreadth,
+                                      color: DayAxisColor,
+                                    ),
+                                    for (int i = 0; i < daysAxis.length; i++)
                                       Container(
-                                          width: TimeAxisBreadth,
-                                          height: TimeAxisUnitLength,
-                                          // color: TimeAxisColor,
-                                          decoration: BoxDecoration(
-                                            color: TimeAxisColor,
-                                            // makes the border disappear, nice hack
-                                            border: Border(bottom: BorderSide(color: TimeAxisColor, width: 0.0)),
-                                          ),
+                                          height: DayAxisBreadth,
+                                          width: DayAxisUnitLength,
+                                          color: DayAxisColor,
                                           child: Center(
                                               child: Text(
-                                            timeAxis[i],
+                                            daysAxis[i],
                                             style: TextStyle(
-                                              fontWeight: FontWeight.bold,
+                                              fontWeight: FontWeight.normal,
+                                              fontSize: 16,
                                             ),
                                           ))),
                                   ],
                                 ),
 
-                                // Class Slots (Row of columns of days)
-                                Container(
-                                  width: DayAxisUnitLength * (daysAxis.length * 1),
-                                  height: TimeAxisUnitLength * (timeAxis.length * 1),
-                                  color: getRandomColor(),
-                                  child: Row(
-                                    children: [
-                                      for (int dayNumber = 0; dayNumber < 5; dayNumber++)
-                                        Container(
-                                          width: DayAxisUnitLength,
-                                          height: TimeAxisUnitLength * (timeAxis.length * 1),
-                                          color: GridColor,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              for (int containerNumber = 0; containerNumber < ContainersToPrint.length; containerNumber++)
-                                                if (ContainersToPrint[containerNumber].dayNumber == dayNumber)
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      if (ContainersToPrint[containerNumber].dayString == "") return;
+                                // ALL BELOW DAY AXIS
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // TIME AXIS
+                                    Column(
+                                      children: [
+                                        for (int i = 0; i < timeAxis.length; i++)
+                                          Container(
+                                              width: TimeAxisBreadth,
+                                              height: TimeAxisUnitLength,
+                                              // color: TimeAxisColor,
+                                              decoration: BoxDecoration(
+                                                color: TimeAxisColor,
+                                                // makes the border disappear, nice hack
+                                                border: Border(bottom: BorderSide(color: TimeAxisColor, width: 0.0)),
+                                              ),
+                                              child: Center(
+                                                  child: Text(
+                                                timeAxis[i],
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.normal,
+                                                  fontSize: 14,
+                                                ),
+                                              ))),
+                                      ],
+                                    ),
 
-                                                      if (deleteButtonPressed) {
-                                                        contactDatabase(context, 'delete_timetable', toDeleteMap(ContainersToPrint[containerNumber])).then((returnStatus) {
-                                                          if (returnStatus.isEmpty) return;
+                                    // Class Slots (Row of columns of days)
+                                    Container(
+                                      width: DayAxisUnitLength * (daysAxis.length * 1),
+                                      height: TimeAxisUnitLength * (timeAxis.length * 1),
+                                      color: getRandomColor(),
+                                      child: Row(
+                                        children: [
+                                          for (int dayNumber = 0; dayNumber < 5; dayNumber++)
+                                            Container(
+                                              width: DayAxisUnitLength,
+                                              height: TimeAxisUnitLength * (timeAxis.length * 1),
+                                              color: GridColor,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  for (int containerNumber = 0; containerNumber < ContainersToPrint.length; containerNumber++)
+                                                    if (ContainersToPrint[containerNumber].dayNumber == dayNumber)
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          if (ContainersToPrint[containerNumber].dayString == "") return;
 
-                                                          setState(() {
-                                                            deleteTimetableSlot(containerNumber);
-                                                          });
-                                                        });
-                                                      } else if (editButtonPressed) {
-                                                        selectedDay = ContainersToPrint[containerNumber].dayString;
-                                                        selectedStartTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].startTimeString);
-                                                        selectedEndTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].endTimeString);
-                                                        enteredCourse = ContainersToPrint[containerNumber].course;
-                                                        enteredVenue = ContainersToPrint[containerNumber].venue;
-                                                        enteredNotes = ContainersToPrint[containerNumber].notes;
-                                                        selectedColor = ContainersToPrint[containerNumber].color ?? SlotColor;
-                                                        showEditDialog(context, containerNumber);
-                                                      } else if (addButtonPressed) {
-                                                      } else {
-                                                        showViewDialog(context, containerNumber);
-                                                      }
-                                                    },
-                                                    onDoubleTap: () {
-                                                      // if (ContainersToPrint[containerNumber].dayString == "") return;
-                                                      // if (deleteButtonPressed || addButtonPressed || editButtonPressed) return;
+                                                          if (deleteButtonPressed) {
+                                                            contactDatabase(context, 'delete_timetable', toDeleteMap(ContainersToPrint[containerNumber])).then((returnStatus) {
+                                                              if (returnStatus.isEmpty) return;
 
-                                                      // showViewDialog(context, containerNumber);
-                                                      // return;
-                                                    },
-                                                    child: Container(
-                                                      padding: EdgeInsets.all(5),
-                                                      width: DayAxisUnitLength,
-                                                      height: ContainersToPrint[containerNumber].length,
-                                                      color: ContainersToPrint[containerNumber].color,
-                                                      child: Align(
-                                                        alignment: Alignment.center, // vertical align
-                                                        child: RichText(
-                                                          textAlign: TextAlign.center, // horizontal align
-                                                          text: TextSpan(
-                                                            style: TextStyle(
-                                                              fontSize: 16,
-                                                              fontFamily: 'Roboto',
-                                                              color: Colors.black,
-                                                              decoration: TextDecoration.none,
-                                                            ),
-                                                            children: <TextSpan>[
-                                                              TextSpan(
-                                                                  text: ContainersToPrint[containerNumber].course,
-                                                                  style: TextStyle(
-                                                                    fontWeight: FontWeight.bold,
-                                                                  )),
-                                                              TextSpan(
-                                                                text: '\n',
+                                                              setState(() {
+                                                                deleteTimetableSlot(containerNumber);
+                                                              });
+                                                            });
+                                                          } else if (editButtonPressed) {
+                                                            selectedDay = ContainersToPrint[containerNumber].dayString;
+                                                            selectedStartTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].startTimeString);
+                                                            selectedEndTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].endTimeString);
+                                                            enteredCourse = ContainersToPrint[containerNumber].course;
+                                                            enteredVenue = ContainersToPrint[containerNumber].venue;
+                                                            enteredNotes = ContainersToPrint[containerNumber].notes;
+                                                            selectedColor = ContainersToPrint[containerNumber].color ?? SlotColor;
+                                                            showEditDialog(context, containerNumber);
+                                                          } else if (addButtonPressed) {
+                                                          } else {
+                                                            showViewDialog(context, containerNumber);
+                                                          }
+                                                        },
+                                                        onDoubleTap: () {
+                                                          // if (ContainersToPrint[containerNumber].dayString == "") return;
+                                                          // if (deleteButtonPressed || addButtonPressed || editButtonPressed) return;
+
+                                                          // showViewDialog(context, containerNumber);
+                                                          // return;
+                                                        },
+                                                        child: Container(
+                                                          padding: EdgeInsets.all(5),
+                                                          width: DayAxisUnitLength,
+                                                          height: ContainersToPrint[containerNumber].length,
+                                                          color: ContainersToPrint[containerNumber].color,
+                                                          child: Align(
+                                                            alignment: Alignment.center, // vertical align
+                                                            child: RichText(
+                                                              textAlign: TextAlign.center, // horizontal align
+                                                              text: TextSpan(
                                                                 style: TextStyle(
-                                                                  fontWeight: FontWeight.normal,
+                                                                  fontSize: 16,
+                                                                  fontFamily: 'Roboto',
+                                                                  color: Colors.black,
+                                                                  decoration: TextDecoration.none,
                                                                 ),
+                                                                children: <TextSpan>[
+                                                                  TextSpan(
+                                                                      text: ContainersToPrint[containerNumber].course,
+                                                                      style: TextStyle(
+                                                                        fontWeight: FontWeight.bold,
+                                                                      )),
+                                                                  TextSpan(
+                                                                    text: '\n',
+                                                                    style: TextStyle(
+                                                                      fontWeight: FontWeight.normal,
+                                                                    ),
+                                                                  ),
+                                                                  TextSpan(
+                                                                    text: ContainersToPrint[containerNumber].venue,
+                                                                    style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16),
+                                                                  ),
+                                                                ],
                                                               ),
-                                                              TextSpan(
-                                                                text: ContainersToPrint[containerNumber].venue,
-                                                                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16),
-                                                              ),
-                                                            ],
+                                                            ),
                                                           ),
+
+                                                          // Center(
+                                                          //   child: Text(ContainersToPrint[
+                                                          //               containerNumber]
+                                                          //           .course +
+                                                          //       "\n" +
+                                                          //       ContainersToPrint[
+                                                          //               containerNumber]
+                                                          //           .venue),
+                                                          // ),
                                                         ),
                                                       ),
-
-                                                      // Center(
-                                                      //   child: Text(ContainersToPrint[
-                                                      //               containerNumber]
-                                                      //           .course +
-                                                      //       "\n" +
-                                                      //       ContainersToPrint[
-                                                      //               containerNumber]
-                                                      //           .venue),
-                                                      // ),
-                                                    ),
-                                                  ),
-                                            ],
-                                          ),
-                                        ),
-                                    ],
-                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
                                 )
                               ],
-                            )
-                          ],
-                        )))),
+                            )))),
 
             // Edit buttons row
             Row(
@@ -1112,20 +1199,22 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 // Add Button
                 Container(
                   // color: Colors.red,
+                  width: ButtonsWidth,
                   margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
-                  decoration: BoxDecoration(
-                    color: addButtonPressed ? Colors.red : EditButtonsColor,
-                    borderRadius: BorderRadius.circular(30), // Adjust the radius
-                  ),
+                  // decoration: BoxDecoration(
+                  // color: addButtonPressed ? Colors.red : EditButtonsColor,
+                  // borderRadius: BorderRadius.circular(30), // Adjust the radius
+                  // border: Border.all(width: 0, color: Colors.transparent),
+                  // ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: addButtonPressed ? Colors.red : EditButtonsColor,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                      backgroundColor: addButtonPressed ? CancelColor : EditButtonsColor,
+                      // foregroundColor: Colors.black,
+                      // shape: RoundedRectangleBorder(
+                      //   borderRadius: BorderRadius.circular(30),
+                      // ),
                     ),
                     onPressed: () async {
                       setState(() {
@@ -1142,7 +1231,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     },
                     child: Text(
                       addButtonPressed ? "Cancel" : "Add",
-                      style: TextStyle(fontSize: 20, fontFamily: 'Roboto', color: ButtonsTextColor),
+                      style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
                     ),
                   ),
                 ),
@@ -1150,17 +1239,19 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 // Edit Button
                 Container(
                   // color: Colors.red,
+                  width: ButtonsWidth,
                   margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
-                  decoration: BoxDecoration(
-                    color: editButtonPressed ? Colors.red : EditButtonsColor,
-                    borderRadius: BorderRadius.circular(30), // Adjust the radius
-                  ),
+                  // decoration: BoxDecoration(
+                  // color: editButtonPressed ? Colors.red : EditButtonsColor,
+                  // borderRadius: BorderRadius.circular(30), // Adjust the radius
+                  // border: Border.all(width: 0, color: Colors.transparent),
+                  // ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: editButtonPressed ? Colors.red : EditButtonsColor,
-                      foregroundColor: Colors.black,
+                      backgroundColor: editButtonPressed ? CancelColor : EditButtonsColor,
+                      // foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -1175,7 +1266,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     },
                     child: Text(
                       editButtonPressed ? "Cancel" : "Edit",
-                      style: TextStyle(fontSize: 20, fontFamily: 'Roboto', color: ButtonsTextColor),
+                      style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
                     ),
                   ),
                 ),
@@ -1183,17 +1274,18 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 // Delete Button
                 Container(
                   // color: Colors.red,
+                  width: ButtonsWidth,
                   margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
-                  decoration: BoxDecoration(
-                    color: deleteButtonPressed ? Colors.red : EditButtonsColor,
-                    borderRadius: BorderRadius.circular(30), // Adjust the radius
-                  ),
+                  // decoration: BoxDecoration(
+                  //   color: deleteButtonPressed ? Colors.red : EditButtonsColor,
+                  //   borderRadius: BorderRadius.circular(30), // Adjust the radius
+                  // ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: deleteButtonPressed ? Colors.red : EditButtonsColor,
-                      foregroundColor: Colors.black,
+                      backgroundColor: deleteButtonPressed ? CancelColor : EditButtonsColor,
+                      // foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -1208,7 +1300,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     },
                     child: Text(
                       deleteButtonPressed ? "Cancel" : "Delete",
-                      style: TextStyle(fontSize: 20, fontFamily: 'Roboto', color: ButtonsTextColor),
+                      style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
                     ),
                   ),
                 ),
@@ -1262,7 +1354,16 @@ class _TimeTablePageState extends State<TimeTablePage> {
       //   "venue": "LH3 FCSE",
       //   "subject": "CS221"
       // };
+      setState(() {
+        isLoading = true;
+      });
+
       final jsonData = await getterAPIWithDataPOST(url, data: dataToSend);
+
+      setState(() {
+        isLoading = false;
+      });
+
       print(jsonData);
       return jsonData;
     } catch (e) {
