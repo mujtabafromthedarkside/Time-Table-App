@@ -13,8 +13,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         textTheme: TextTheme(
-          bodyText1: TextStyle(color: Colors.white), // Set your desired default text color
-          bodyText2: TextStyle(color: Colors.white), // You can set different styles for other text types if needed
+          bodyLarge: TextStyle(color: Colors.white), // Set your desired default text color
+          bodyMedium: TextStyle(color: Colors.white), // You can set different styles for other text types if needed
+          bodySmall: TextStyle(color: Colors.white), // You can set different styles for other text types if needed
         ),
       ),
       title: 'Time Table',
