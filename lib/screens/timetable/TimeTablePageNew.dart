@@ -1,144 +1,20 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
 import 'package:timetable/config/API_funcs.dart';
 import 'package:timetable/config/config.dart';
 import 'package:timetable/config/strings.dart';
-import 'package:timetable/screens/SideBar.dart';
+
 import 'package:timetable/screens/login.dart';
+import 'package:timetable/screens/LandingPage.dart';
 
-import 'LandingPage.dart';
+import 'package:timetable/screens/SideBar.dart';
+import 'package:timetable/screens/timetable/TimetableSlot.dart';
 
-// Color GridColor = Color.fromARGB(255, 81, 157, 251);
-// Color SlotColor = const Color.fromARGB(255, 244, 67, 54);
-// Color DayAxisColor = Color.fromARGB(255, 0, 255, 255);
-// Color TimeAxisColor = Color.fromARGB(255, 0, 255, 255);
-// Color GridColor = Color.fromARGB(255, 255, 255, 255);
-Color GridColor = Color(0xFFFFFFEC);
-Color SlotColor = const Color.fromARGB(255, 244, 67, 54);
-Color DayAxisColor = LandingPageDarkBlue;
-Color TimeAxisColor = LandingPageDarkBlue;
-Color DropdownsBFColor = LandingPageBrightYellow; // Batch, Faculty Color
-Color EditButtonsColor = LandingPageBrightYellow;
-Color EditDialogButtonsColor = LandingPageBrightYellow;
-Color CancelColor = Colors.red;
-
-Color DropdownsTextColor = Colors.white;
-Color ButtonsTextColor = Colors.white;
-Color GridTextColor = Colors.black;
-Color AppBarTextColor = Colors.white;
-Color EditDialogTextColor = Colors.white;
-
-double ButtonsWidth = 90;
-double DropdownsBFWidth = 150;
-
-double TimeAxisUnitLength = 65;
-double DayAxisUnitLength = 72;
-
-double TimeAxisBreadth = 60;
-double DayAxisBreadth = 65;
-
-double TimeAxisUnitTime = 30;
-String TimeAxisStartTimeString = "08:00";
-String TimeAxisEndTimeString = "17:30";
-
-int convertTimeToInteger(String time) {
-  int hours = int.parse(time.split(":")[0]);
-  int minutes = int.parse(time.split(":")[1]);
-
-  return hours * 60 + minutes;
-}
+import 'package:timetable/screens/timetable/utils.dart';
 
 int TimeAxisStartTime = convertTimeToInteger(TimeAxisStartTimeString);
 int TimeAxisEndTime = convertTimeToInteger(TimeAxisEndTimeString);
-
-String defaultBatchText = "Choose batch";
-String defaultFacultyText = "Choose faculty";
-
-Color getRandomColor() {
-  Random random = Random();
-  return Color.fromRGBO(
-    random.nextInt(256),
-    random.nextInt(256),
-    random.nextInt(256),
-    1.0,
-  );
-}
-
-class TimetableSlot {
-  late int startTime;
-  late int endTime;
-  late int dayNumber;
-
-  String dayString = ""; // empty container has empty strings
-  String endTimeString = "";
-  String startTimeString = "";
-
-  String course = "";
-  String venue = "";
-  String notes = "";
-
-  Color? color = GridColor;
-  // Color? color = getRandomColor();
-  late double length;
-
-  TimetableSlot.Empty() {
-    this.color = SlotColor;
-  }
-
-  TimetableSlot.Copy(TimetableSlot other) {
-    this.startTime = other.startTime;
-    this.endTime = other.endTime;
-    this.dayNumber = other.dayNumber;
-
-    this.dayString = other.dayString;
-    this.endTimeString = other.endTimeString;
-    this.startTimeString = other.startTimeString;
-
-    this.course = other.course;
-    this.venue = other.venue;
-    this.notes = other.notes;
-
-    this.color = other.color;
-    this.length = other.length;
-  }
-
-  TimetableSlot.FromStrings(this.startTimeString, this.endTimeString, this.dayString, this.course, this.venue, this.notes, this.color) {
-    this.calculateValues();
-  }
-
-  TimetableSlot.FromValues(this.startTime, this.endTime, this.dayNumber) {
-    // time ratio * unit length
-    this.calculateLength();
-  }
-
-  void updateEndTime(int newEndTime) {
-    this.endTime = newEndTime;
-    this.calculateLength();
-  }
-
-  void calculateLength() {
-    this.length = (this.endTime - this.startTime) / TimeAxisUnitTime * TimeAxisUnitLength;
-  }
-
-  void calculateValues() {
-    int startHours = int.parse(startTimeString.split(":")[0]);
-    int startMinutes = int.parse(startTimeString.split(":")[1]);
-
-    int endHours = int.parse(endTimeString.split(":")[0]);
-    int endMinutes = int.parse(endTimeString.split(":")[1]);
-
-    this.startTime = startHours * 60 + startMinutes;
-    this.endTime = endHours * 60 + endMinutes;
-
-    // FOR FUTURE, raise error if dayString not in ["Mon", "Tue", "Wed", "Thu", "Fri"]
-    this.dayNumber = ["Mon", "Tue", "Wed", "Thu", "Fri"].indexOf(dayString);
-    if (this.dayNumber == -1) {
-      this.dayNumber = ["monday", "tuesday", "wednesday", "thursday", "friday"].indexOf(dayString);
-    }
-    this.calculateLength();
-  }
-}
 
 class TimeTablePage extends StatefulWidget {
   const TimeTablePage({super.key});
@@ -148,6 +24,14 @@ class TimeTablePage extends StatefulWidget {
 }
 
 class _TimeTablePageState extends State<TimeTablePage> {
+  // DROPDOWN VALUES
+  String selectedBatch = defaultBatchText;
+  String selectedFaculty = defaultFacultyText;
+  final List<String> texts = ['Text 1', 'Text 2'];
+  final List<String> timeAxis = [];
+  
+  // USEFUL ARRAYS
+  final List<String> daysAxis = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   final List<TimetableSlot> ContainersToPrint = [];
   final List<TimetableSlot> TimetableSlots = [
     // TimetableSlot.FromStrings("10:00", "11:00", "Mon", "ES341", "ACB MLH", "", Colors.red),
@@ -158,51 +42,20 @@ class _TimeTablePageState extends State<TimeTablePage> {
     // TimetableSlot.FromStrings("8:00", "9:00", "Thu", "ES304", "ACB LH6", "", Colors.purple),
   ];
 
+  // BOOLEANS FOR BUTTONS
   bool addButtonPressed = false;
-  int copyIndex = -1;
-  final List<String> daysAxis = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   bool deleteButtonPressed = false;
   bool editButtonPressed = false;
+  bool isLoading = false;
 
-  String selectedBatch = defaultBatchText;
-  String selectedFaculty = defaultFacultyText;
-  final List<String> texts = ['Text 1', 'Text 2'];
-  final List<String> timeAxis = [];
-
-  Map<String, String> toAddMap(TimetableSlot slot) {
-    return {
-      "faculty": selectedFaculty + selectedBatch,
-      "day": slot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
-      "start_time": slot.startTimeString,
-      "end_time": slot.endTimeString,
-      "venue": slot.venue,
-      "subject": slot.course,
-      "color": slot.color.toString().replaceFirst("Color(0xff", "#").replaceFirst(")", ""), // Also needs to be standardized.
-    };
-  }
-
-  Map<String, String> toDeleteMap(TimetableSlot slot) {
-    return {
-      "faculty": selectedFaculty + selectedBatch,
-      "day": slot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
-      "start_time": slot.startTimeString,
-    };
-  }
-
-  Map<String, String> toEditMap(TimetableSlot newSlot, TimetableSlot oldSlot) {
-    return {
-      "old_day": oldSlot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
-      "old_start_time": oldSlot.startTimeString,
-
-      "faculty": selectedFaculty + selectedBatch,
-      "day": newSlot.dayString, // This will cause problems since backend uses full day name while I use first 3 letters, but insertTimetableSlot() should handle it
-      "start_time": newSlot.startTimeString,
-      "end_time": newSlot.endTimeString,
-      "venue": newSlot.venue,
-      "subject": newSlot.course,
-      "color": newSlot.color.toString().replaceFirst("Color(0xff", "#").replaceFirst(")", ""), // Also needs to be standardized.
-    };
-  }
+  // ADD/EDIT DIALOG BOX VALUES
+  late String selectedStartTimeInDialogBox;
+  late String selectedEndTimeInDialogBox;
+  late String selectedDay;
+  late String enteredCourse;
+  late String enteredVenue;
+  late String enteredNotes;
+  late Color selectedColor = SlotColor; // Initial color
 
   bool insertTimetableSlot(TimetableSlot newSlot) {
     bool LiesInBetween(int x, int a, int b, int state) {
@@ -323,14 +176,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
     updateContainersToPrint();
   }
 
-  late String selectedStartTimeInDialogBox;
-  late String selectedEndTimeInDialogBox;
-  late String selectedDay;
-  late String enteredCourse;
-  late String enteredVenue;
-  late String enteredNotes;
-  late Color selectedColor = SlotColor; // Initial color
-
   void ResetDialogBoxValues() {
     selectedStartTimeInDialogBox = "08:00 AM";
     selectedEndTimeInDialogBox = "09:00 AM";
@@ -339,55 +184,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
     enteredVenue = "";
     enteredNotes = "";
     selectedColor = SlotColor; // Initial color
-  }
-
-  String convertTimeToAMPM(String time) {
-    int hours = int.parse(time.split(":")[0]);
-    String minutes = time.split(":")[1];
-
-    if (hours >= 12) {
-      if (hours > 12) {
-        hours -= 12;
-      }
-      return hours.toString() + ":" + minutes + " PM";
-    } else {
-      if (hours == 0) {
-        hours = 12;
-      }
-      return hours.toString() + ":" + minutes + " AM";
-    }
-  }
-
-  String convertTimeTo24Hours(String time) {
-    String hours = time.split(":")[0];
-    String minutes = time.split(":")[1].split(" ")[0];
-    String ampm = time.split(":")[1].split(" ")[1];
-
-    if (ampm == "AM") {
-      if (hours == "12") {
-        hours = "00";
-      }
-    } else {
-      if (hours != "12") {
-        hours = (int.parse(hours) + 12).toString();
-      }
-    }
-
-    return hours + ":" + minutes;
-  }
-
-  int convertTimeToInteger(String time) {
-    int hours = int.parse(time.split(":")[0]);
-    int minutes = int.parse(time.split(":")[1]);
-
-    return hours * 60 + minutes;
-  }
-
-  String convertTimeToString(int time) {
-    String hours = (time ~/ 60).toString();
-    String minutes = (time % 60).toString();
-
-    return "$hours:${minutes.length == 1 ? "0$minutes" : minutes}";
   }
 
   Future<void> showViewDialog(BuildContext context, int containerNumber) async {
@@ -623,13 +419,13 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   TextField(
                     controller: textControllerCourse,
                     decoration: InputDecoration(
-                        labelText: 'Enter Course:', labelStyle: TextStyle(color: Colors.grey), hintText: 'ES324', hintStyle: TextStyle(color: Colors.grey[300], fontWeight: FontWeight.normal)),
+                        labelText: 'Enter Course:', labelStyle: TextStyle(color: Colors.grey), hintText: 'ES324', hintStyle: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.normal)),
                   ),
                   SizedBox(height: 10),
                   TextField(
                     controller: textControllerVenue,
                     decoration: InputDecoration(
-                        labelText: 'Enter Venue:', labelStyle: TextStyle(color: Colors.grey), hintText: 'ACB MLH', hintStyle: TextStyle(color: Colors.grey[300], fontWeight: FontWeight.normal)),
+                        labelText: 'Enter Venue:', labelStyle: TextStyle(color: Colors.grey), hintText: 'ACB MLH', hintStyle: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.normal)),
                   ),
                   SizedBox(height: 10),
                   TextField(
@@ -639,7 +435,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         labelText: 'Enter Notes:',
                         labelStyle: TextStyle(color: Colors.grey),
                         hintText: 'Quiz in this class',
-                        hintStyle: TextStyle(color: Colors.grey[300], fontWeight: FontWeight.normal)),
+                        hintStyle: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.normal)),
                   ),
                   SizedBox(height: 10),
                   Container(
@@ -767,7 +563,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
                   if (editingON) {
-                    contactDatabase(context, 'update_timetable', toEditMap(newSlot, oldSlot)).then((returnStatus) {
+                    Map<String, String> dataToSend = toEditMap(newSlot, oldSlot);
+                    dataToSend['faculty'] = selectedFaculty + selectedBatch;
+
+                    contactDatabase(context, 'update_timetable', dataToSend).then((returnStatus) {
                       if (returnStatus.isEmpty) return;
 
                       setState(() {
@@ -775,7 +574,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
                       });
                     });
                   } else {
-                    contactDatabase(context, 'add_timetable', toAddMap(newSlot)).then((returnStatus) {
+                    Map<String, String> dataToSend = toAddMap(newSlot);
+                    dataToSend['faculty'] = selectedFaculty + selectedBatch;
+
+                    contactDatabase(context, 'add_timetable', dataToSend).then((returnStatus) {
                       if (returnStatus.isEmpty) return;
 
                       setState(() {
@@ -798,7 +600,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
     );
   }
 
-  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1105,7 +906,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                           if (ContainersToPrint[containerNumber].dayString == "") return;
 
                                                           if (deleteButtonPressed) {
-                                                            contactDatabase(context, 'delete_timetable', toDeleteMap(ContainersToPrint[containerNumber])).then((returnStatus) {
+                                                            Map<String, String> dataToSend = toDeleteMap(ContainersToPrint[containerNumber]);
+                                                            dataToSend['faculty'] = selectedFaculty + selectedBatch;
+
+                                                            contactDatabase(context, 'delete_timetable', dataToSend).then((returnStatus) {
                                                               if (returnStatus.isEmpty) return;
 
                                                               setState(() {
@@ -1196,6 +1000,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+
                 // Add Button
                 Container(
                   // color: Colors.red,
@@ -1235,7 +1040,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     ),
                   ),
                 ),
-
+                
                 // Edit Button
                 Container(
                   // color: Colors.red,
@@ -1310,11 +1115,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
         ),
       ),
     );
-  }
-
-  /// Construct a color from a hex code string, of the format #RRGGBB.
-  Color hexToColor(String code) {
-    return Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
   }
 
   ReadTimetable(Map<String, dynamic> Data) {
