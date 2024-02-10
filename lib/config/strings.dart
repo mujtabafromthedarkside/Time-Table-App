@@ -7,6 +7,11 @@ String TimeAxisEndTimeString = "17:30";
 String defaultBatchText = "Choose batch";
 String defaultFacultyText = "Choose faculty";
 
+String ButtonPrompt = "";
+String defaultButtonPrompt = "";
+String editButtonPrompt = "Click a slot to EDIT";
+String deleteButtonPrompt = "Click a slot to DELETE";
+
 // COLORS
 Color LandingPageBrightYellow = Color(0xFFE9A21A);
 Color LandingPageLightBlue = Color(0xFF357C93);
@@ -35,6 +40,7 @@ Color EditDialogTextColor = Colors.white;
 // DIMENSIONS
 double ButtonsWidth = 90;
 double DropdownsBFWidth = 150;
+double TimeButtonsWidth = 110;
 
 double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 72;

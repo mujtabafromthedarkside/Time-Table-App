@@ -29,7 +29,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
   String selectedFaculty = defaultFacultyText;
   final List<String> texts = ['Text 1', 'Text 2'];
   final List<String> timeAxis = [];
-  
+
   // USEFUL ARRAYS
   final List<String> daysAxis = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   final List<TimetableSlot> ContainersToPrint = [];
@@ -237,6 +237,33 @@ class _TimeTablePageState extends State<TimeTablePage> {
         });
   }
 
+  Future<TimeOfDay?> showCustomTimePicker(BuildContext context){
+    return showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.dark(
+              error: LandingPageDarkBlue,
+              // background: LandingPageDarkBlue,
+              //     onBackground: EditDialogTextColor,
+              surface: LandingPageDarkBlue,
+              //     onSurface: EditDialogTextColor,
+              primary: LandingPageBrightYellow,
+              //     onPrimary: Colors.black,
+              secondary: LandingPageBrightYellow,
+              //     onSecondary: Colors.black,
+              // tertiary: LandingPageBrightYellow,
+            ),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary, buttonColor: LandingPageBrightYellow),
+          ),
+          child: child!,
+        );
+      },
+    );
+  }
+
   Future<void> showEditDialog(BuildContext context, int containerNumber) async {
     TextEditingController textControllerCourse = TextEditingController();
     textControllerCourse.text = enteredCourse;
@@ -334,29 +361,16 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         children: [
                           Text("Start Time", style: TextStyle(fontWeight: FontWeight.normal)),
                           Container(
-                            width: 110,
+                            width: TimeButtonsWidth,
                             child: ElevatedButton(
-                              child: Text(selectedStartTimeInDialogBox),
+                              child: Text(selectedStartTimeInDialogBox, style: TextStyle(fontWeight: FontWeight.normal)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: EditDialogButtonsColor,
                                 foregroundColor: EditDialogTextColor,
                               ),
                               onPressed: () async {
                                 // Show the time picker dialog
-                                final TimeOfDay? selectedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.now(),
-                                  builder: (BuildContext context, Widget? child) {
-                                    return Theme(
-                                      data: ThemeData.light().copyWith(
-                                        primaryColor: LandingPageBrightYellow, // Set your desired primary color
-                                        colorScheme: ColorScheme.light(primary: LandingPageBrightYellow),
-                                        buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary, buttonColor: LandingPageBrightYellow),
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
-                                );
+                                final TimeOfDay? selectedTime = await showCustomTimePicker(context);
 
                                 // Do something with the selected time
                                 if (selectedTime != null) {
@@ -376,29 +390,16 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         children: [
                           Text("End Time", style: TextStyle(fontWeight: FontWeight.normal)),
                           Container(
-                            width: 110,
+                            width: TimeButtonsWidth,
                             child: ElevatedButton(
-                              child: Text(selectedEndTimeInDialogBox),
+                              child: Text(selectedEndTimeInDialogBox, style: TextStyle(fontWeight: FontWeight.normal)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: EditDialogButtonsColor,
                                 foregroundColor: EditDialogTextColor,
                               ),
                               onPressed: () async {
                                 // Show the time picker dialog
-                                final TimeOfDay? selectedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.now(),
-                                  builder: (BuildContext context, Widget? child) {
-                                    return Theme(
-                                      data: ThemeData.light().copyWith(
-                                        primaryColor: LandingPageBrightYellow, // Set your desired primary color
-                                        colorScheme: ColorScheme.light(primary: LandingPageBrightYellow),
-                                        buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary, buttonColor: LandingPageBrightYellow),
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
-                                );
+                                final TimeOfDay? selectedTime = await showCustomTimePicker(context);
 
                                 // Do something with the selected time
                                 if (selectedTime != null) {
@@ -996,16 +997,24 @@ class _TimeTablePageState extends State<TimeTablePage> {
                               ],
                             )))),
 
+            Container(
+              margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+              child: Center(
+                  child: Text(
+                ButtonPrompt,
+                style: TextStyle(color: SlotColor, fontSize: 16, fontWeight: FontWeight.normal),
+              )),
+            ),
+
             // Edit buttons row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-
                 // Add Button
                 Container(
                   // color: Colors.red,
                   width: ButtonsWidth,
-                  margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
+                  margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
                   // decoration: BoxDecoration(
                   // color: addButtonPressed ? Colors.red : EditButtonsColor,
                   // borderRadius: BorderRadius.circular(30), // Adjust the radius
@@ -1040,12 +1049,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     ),
                   ),
                 ),
-                
+
                 // Edit Button
                 Container(
                   // color: Colors.red,
                   width: ButtonsWidth,
-                  margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
+                  margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
                   // decoration: BoxDecoration(
                   // color: editButtonPressed ? Colors.red : EditButtonsColor,
                   // borderRadius: BorderRadius.circular(30), // Adjust the radius
@@ -1066,6 +1075,11 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         if (deleteButtonPressed || addButtonPressed) {
                         } else {
                           editButtonPressed = !editButtonPressed;
+                          if (editButtonPressed) {
+                            ButtonPrompt = editButtonPrompt;
+                          } else {
+                            ButtonPrompt = defaultButtonPrompt;
+                          }
                         }
                       });
                     },
@@ -1080,7 +1094,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 Container(
                   // color: Colors.red,
                   width: ButtonsWidth,
-                  margin: EdgeInsets.fromLTRB(0, 40, 0, 20),
+                  margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
                   // decoration: BoxDecoration(
                   //   color: deleteButtonPressed ? Colors.red : EditButtonsColor,
                   //   borderRadius: BorderRadius.circular(30), // Adjust the radius
@@ -1100,6 +1114,11 @@ class _TimeTablePageState extends State<TimeTablePage> {
                         if (addButtonPressed || editButtonPressed) {
                         } else {
                           deleteButtonPressed = !deleteButtonPressed;
+                          if (deleteButtonPressed) {
+                            ButtonPrompt = deleteButtonPrompt;
+                          } else {
+                            ButtonPrompt = defaultButtonPrompt;
+                          }
                         }
                       });
                     },
