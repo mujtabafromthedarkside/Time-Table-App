@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 String TimeAxisStartTimeString = "08:00";
 String TimeAxisEndTimeString = "17:30";
 
-String defaultBatchText = "Choose batch";
-String defaultFacultyText = "Choose faculty";
+String defaultBatchText = "Batch";
+String defaultFacultyText = "Faculty";
 
+String editDialogWarningPrompt = "";
 String ButtonPrompt = "";
 String defaultButtonPrompt = "";
 String editButtonPrompt = "Click a slot to EDIT";
@@ -39,8 +40,10 @@ Color EditDialogTextColor = Colors.white;
 
 // DIMENSIONS
 double ButtonsWidth = 90;
-double DropdownsBFWidth = 150;
-double TimeButtonsWidth = 110;
+double DropdownsBFWidth = 100;
+double DropdownsBFHeight = 40;
+double customTimeButtonWIDTH = 70;
+double customTimeButtonHEIGHT = 40;
 
 double TimeAxisUnitLength = 65;
 double DayAxisUnitLength = 72;

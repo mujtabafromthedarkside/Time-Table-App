@@ -16,6 +16,17 @@ import 'package:timetable/screens/timetable/utils.dart';
 int TimeAxisStartTime = convertTimeToInteger(TimeAxisStartTimeString);
 int TimeAxisEndTime = convertTimeToInteger(TimeAxisEndTimeString);
 
+class specificTimeString {
+  late String time;
+
+  specificTimeString(this.time);
+
+  TimeOfDay toTimeOfDay() {
+    String time = convertTimeTo24Hours(this.time);
+    return TimeOfDay(hour: int.parse(time.split(":")[0]), minute: int.parse(time.split(":")[1].split(" ")[0]));
+  }
+}
+
 class TimeTablePage extends StatefulWidget {
   const TimeTablePage({super.key});
 
@@ -49,8 +60,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
   bool isLoading = false;
 
   // ADD/EDIT DIALOG BOX VALUES
-  late String selectedStartTimeInDialogBox;
-  late String selectedEndTimeInDialogBox;
+  late specificTimeString selectedStartTimeInDialogBox = specificTimeString("08:00 AM");
+  late specificTimeString selectedEndTimeInDialogBox = specificTimeString("09:00 AM");
   late String selectedDay;
   late String enteredCourse;
   late String enteredVenue;
@@ -177,13 +188,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
   }
 
   void ResetDialogBoxValues() {
-    selectedStartTimeInDialogBox = "08:00 AM";
-    selectedEndTimeInDialogBox = "09:00 AM";
+    selectedStartTimeInDialogBox.time = "08:00 AM";
+    selectedEndTimeInDialogBox.time = "09:00 AM";
     selectedDay = "Day";
     enteredCourse = "";
     enteredVenue = "";
     enteredNotes = "";
     selectedColor = SlotColor; // Initial color
+    editDialogWarningPrompt = "";
   }
 
   Future<void> showViewDialog(BuildContext context, int containerNumber) async {
@@ -237,33 +249,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
         });
   }
 
-  Future<TimeOfDay?> showCustomTimePicker(BuildContext context){
-    return showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: ColorScheme.dark(
-              error: LandingPageDarkBlue,
-              // background: LandingPageDarkBlue,
-              //     onBackground: EditDialogTextColor,
-              surface: LandingPageDarkBlue,
-              //     onSurface: EditDialogTextColor,
-              primary: LandingPageBrightYellow,
-              //     onPrimary: Colors.black,
-              secondary: LandingPageBrightYellow,
-              //     onSecondary: Colors.black,
-              // tertiary: LandingPageBrightYellow,
-            ),
-            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary, buttonColor: LandingPageBrightYellow),
-          ),
-          child: child!,
-        );
-      },
-    );
-  }
-
   Future<void> showEditDialog(BuildContext context, int containerNumber) async {
     TextEditingController textControllerCourse = TextEditingController();
     textControllerCourse.text = enteredCourse;
@@ -288,6 +273,72 @@ class _TimeTablePageState extends State<TimeTablePage> {
       showEditDialog(context, containerNumber);
     }
 
+    Future<TimeOfDay?> showCustomTimePicker(BuildContext context, TimeOfDay initialTime) {
+      return showTimePicker(
+        context: context,
+        // initialTime: TimeOfDay.now(),
+        initialTime: initialTime,
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+            data: ThemeData.dark().copyWith(
+              colorScheme: ColorScheme.dark(
+                error: LandingPageDarkBlue,
+                // background: LandingPageDarkBlue,
+                //     onBackground: EditDialogTextColor,
+                surface: LandingPageDarkBlue,
+                //     onSurface: EditDialogTextColor,
+                primary: LandingPageBrightYellow,
+                //     onPrimary: Colors.black,
+                secondary: LandingPageBrightYellow,
+                //     onSecondary: Colors.black,
+                // tertiary: LandingPageBrightYellow,
+              ),
+              buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary, buttonColor: LandingPageBrightYellow),
+            ),
+            child: child!,
+          );
+        },
+      );
+    }
+
+    Column customTimeButton(BuildContext context, String heading, specificTimeString selectedTimeInDialogBox) {
+      return Column(
+        children: [
+          Text(heading, style: TextStyle(fontWeight: FontWeight.normal)),
+          Container(
+            width: customTimeButtonWIDTH,
+            height: customTimeButtonHEIGHT,
+            margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
+            child: ElevatedButton(
+              child: Text(convertTimeTo24Hours(selectedTimeInDialogBox.time), style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal)),
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0), // Adjust the value to control the roundness
+                    // You can also specify other border properties here such as side: BorderSide(color: Colors.red)
+                  ),
+                  backgroundColor: EditDialogButtonsColor,
+                  foregroundColor: EditDialogTextColor,
+                  padding: EdgeInsets.fromLTRB(5, 0, 5, 0)),
+              onPressed: () async {
+                // Show the time picker dialog
+                final TimeOfDay? selectedTime = await showCustomTimePicker(context, selectedTimeInDialogBox.toTimeOfDay());
+
+                // Do something with the selected time
+                if (selectedTime != null) {
+                  print("setState called");
+                  // setState(() {
+                  selectedTimeInDialogBox.time = selectedTime.format(context);
+                  // });
+                }
+
+                UpdateValuesAndReopen();
+              },
+            ),
+          ),
+        ],
+      );
+    }
+
     return showDialog(
       context: context,
       builder: (context) {
@@ -303,114 +354,63 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 // mainAxisSize: MainAxisSize.min,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
-                    child: Container(
-                      width: 150,
-                      decoration: BoxDecoration(
-                        color: DropdownsBFColor, // Set the background color
-                        borderRadius: BorderRadius.circular(30), // Optional: Set border radius
-                      ),
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              isExpanded: true,
-                              selectedItemBuilder: (BuildContext context) {
-                                return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                                  return Center(child: Text(value, style: TextStyle(color: EditDialogTextColor)));
-                                }).toList();
-                              },
-                              items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Center(
-                                      child: Text(
-                                    value,
-                                    style: TextStyle(color: EditDialogTextColor, fontWeight: (value == "Day" ? FontWeight.bold : FontWeight.normal)),
-                                    // textAlign: TextAlign.center,
-                                  )),
-                                );
-                              }).toList(),
-                              onChanged: (String? value) => setState(() {
-                                selectedDay = value ?? "";
-
-                                UpdateValuesAndReopen();
-                              }),
-                              value: selectedDay,
-                              icon: Icon(Icons.arrow_downward, color: EditDialogTextColor), // Custom icon
-                              iconSize: 20, // Set icon size
-                              elevation: 0, // Dropdown menu elevation
-                              style: TextStyle(
-                                color: EditDialogTextColor,
-                                fontSize: 16,
-                                fontFamily: 'Roboto',
-                              ),
-                              dropdownColor: DropdownsBFColor,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      customTimeButton(context, "Start", selectedStartTimeInDialogBox),
+                      customTimeButton(context, "End", selectedEndTimeInDialogBox),
                       Column(
                         children: [
-                          Text("Start Time", style: TextStyle(fontWeight: FontWeight.normal)),
+                          Text("Day", style: TextStyle(fontWeight: FontWeight.normal)),
                           Container(
-                            width: TimeButtonsWidth,
-                            child: ElevatedButton(
-                              child: Text(selectedStartTimeInDialogBox, style: TextStyle(fontWeight: FontWeight.normal)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: EditDialogButtonsColor,
-                                foregroundColor: EditDialogTextColor,
-                              ),
-                              onPressed: () async {
-                                // Show the time picker dialog
-                                final TimeOfDay? selectedTime = await showCustomTimePicker(context);
-
-                                // Do something with the selected time
-                                if (selectedTime != null) {
-                                  print("setState called");
-                                  // setState(() {
-                                  selectedStartTimeInDialogBox = selectedTime.format(context);
-                                  // });
-                                }
-
-                                UpdateValuesAndReopen();
-                              },
+                            width: customTimeButtonWIDTH,
+                            height: customTimeButtonHEIGHT,
+                            margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                            decoration: BoxDecoration(
+                              color: DropdownsBFColor, // Set the background color
+                              // borderRadius: BorderRadius.circular(30), // Optional: Set border radius
+                              borderRadius: BorderRadius.circular(20.0), // Optional: Set border radius
                             ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Text("End Time", style: TextStyle(fontWeight: FontWeight.normal)),
-                          Container(
-                            width: TimeButtonsWidth,
-                            child: ElevatedButton(
-                              child: Text(selectedEndTimeInDialogBox, style: TextStyle(fontWeight: FontWeight.normal)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: EditDialogButtonsColor,
-                                foregroundColor: EditDialogTextColor,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(19, 0, 4, 0),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    isExpanded: true,
+                                    selectedItemBuilder: (BuildContext context) {
+                                      return <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                                        return Center(child: Text(value, style: TextStyle(color: EditDialogTextColor)));
+                                      }).toList();
+                                    },
+                                    items: <String>['Day', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Center(
+                                            child: Text(
+                                          value,
+                                          style: TextStyle(color: EditDialogTextColor, fontWeight: (value == "Day" ? FontWeight.bold : FontWeight.normal)),
+                                          // textAlign: TextAlign.center,
+                                        )),
+                                      );
+                                    }).toList(),
+                                    onChanged: (String? value) => setState(() {
+                                      selectedDay = value ?? "";
+
+                                      UpdateValuesAndReopen();
+                                    }),
+                                    value: selectedDay,
+                                    icon: Icon(Icons.arrow_downward, color: EditDialogTextColor), // Custom icon
+                                    iconSize: 15, // Set icon size
+                                    elevation: 0, // Dropdown menu elevation
+                                    style: TextStyle(
+                                      color: EditDialogTextColor,
+                                      fontSize: 14,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                    dropdownColor: DropdownsBFColor,
+                                  ),
+                                ),
                               ),
-                              onPressed: () async {
-                                // Show the time picker dialog
-                                final TimeOfDay? selectedTime = await showCustomTimePicker(context);
-
-                                // Do something with the selected time
-                                if (selectedTime != null) {
-                                  print("setState called");
-                                  // setState(() {
-                                  selectedEndTimeInDialogBox = selectedTime.format(context);
-                                  // });
-                                }
-
-                                UpdateValuesAndReopen();
-                              },
                             ),
                           ),
                         ],
@@ -480,6 +480,15 @@ class _TimeTablePageState extends State<TimeTablePage> {
                       ),
                     ),
                   ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                    child: Center(
+                        child: Text(
+                      editDialogWarningPrompt,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: SlotColor, fontSize: 16, fontWeight: FontWeight.normal),
+                    )),
+                  ),
                 ],
               ),
             ),
@@ -493,11 +502,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   backgroundColor: EditDialogButtonsColor,
                   padding: EdgeInsets.all(0),
                 ),
-                child: Text('Cancel', style: TextStyle(color: GridTextColor)),
+                child: Text('Cancel', style: TextStyle(color: EditDialogTextColor, fontWeight: FontWeight.normal)),
                 onPressed: () {
                   // UI choice. Do we always want to restore previous values on cancel? Or only when we manually entered them?
                   // if(!editingON)
                   UpdateValues();
+                  editDialogWarningPrompt = "";
 
                   // close the dialog
                   Navigator.of(context).pop();
@@ -513,18 +523,33 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   backgroundColor: EditDialogButtonsColor,
                   padding: EdgeInsets.all(0),
                 ),
-                child: Text('OK', style: TextStyle(color: GridTextColor)),
+                child: Text('OK', style: TextStyle(color: EditDialogTextColor, fontWeight: FontWeight.normal)),
                 onPressed: () {
                   // NOTE: Show WARNINGS HERE
-                  if (selectedDay == "Day") return;
+                  if (selectedDay == "Day") {
+                    print("Day not selected!!");
+                    editDialogWarningPrompt = "Please select a day to proceed!";
+                    UpdateValuesAndReopen();
+                    return;
+                  }
 
-                  int selectedStartTime = convertTimeToInteger(convertTimeTo24Hours(selectedStartTimeInDialogBox));
-                  int selectedEndTime = convertTimeToInteger(convertTimeTo24Hours(selectedEndTimeInDialogBox));
-                  if (selectedStartTime >= selectedEndTime) return;
+                  int selectedStartTime = convertTimeToInteger(convertTimeTo24Hours(selectedStartTimeInDialogBox.time));
+                  int selectedEndTime = convertTimeToInteger(convertTimeTo24Hours(selectedEndTimeInDialogBox.time));
+                  if (selectedStartTime >= selectedEndTime) {
+                    print("Start time must be before end time!");
+                    editDialogWarningPrompt = "Start time must be before end time!";
+                    UpdateValuesAndReopen();
+                    return;
+                  }
 
                   // Make sure the time is between 8:00 AM and 5:30 PM
                   // NOTE: Make constants her
-                  if (selectedStartTime < 480 || selectedEndTime > 1050) return;
+                  if (selectedStartTime < 480 || selectedEndTime > 1050) {
+                    print("Time must be between 8:00 AM and 5:30 PM!");
+                    editDialogWarningPrompt = "Time must be between 8:00 AM and 5:30 PM!";
+                    UpdateValuesAndReopen();
+                    return;
+                  }
 
                   // Handle the input and close the dialog
                   TimetableSlot newSlot = TimetableSlot.Empty();
@@ -554,13 +579,20 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     deleteTimetableSlot(containerNumber);
                   }
 
+                  // NOTE: Check on fe only
                   if (insertTimetableSlot(newSlot) == false) {
                     print("CLASH: ${newSlot.course} on ${newSlot.dayString} has clash btw ${newSlot.startTime} and ${newSlot.endTime}.");
 
-                    if (editingON)
+                    if (editingON) {
                       insertTimetableSlot(oldSlot);
-                    else
-                      return;
+                      setState(() {
+                        updateContainersToPrint();
+                      });
+                    }
+
+                    editDialogWarningPrompt = "Clash with another slot detected!";
+                    UpdateValuesAndReopen();
+                    return;
                   } // WILL NOT RETURN IF editingON because it needs to update Containers below.
 
                   if (editingON) {
@@ -666,6 +698,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 children: [
                   // Batch Dropdown
                   Container(
+                    height: DropdownsBFHeight,
                     width: DropdownsBFWidth,
                     decoration: BoxDecoration(
                       color: LandingPageBrightYellow, // Set the background color
@@ -677,7 +710,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     child: Center(
                       child: Padding(
                         // padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        padding: EdgeInsets.fromLTRB(24, 0, 4, 0),
+                        padding: EdgeInsets.fromLTRB(19, 0, 4, 0),
                         child: Theme(
                           data: Theme.of(context).copyWith(canvasColor: Colors.green[300]),
                           child: DropdownButtonHideUnderline(
@@ -729,7 +762,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                               // hint: const Text(defaultBatchText),
 
                               icon: Icon(Icons.arrow_downward, color: DropdownsTextColor), // Custom icon
-                              iconSize: 20, // Set icon size
+                              iconSize: 15, // Set icon size
                               elevation: 0, // Dropdown menu elevation
                               style: TextStyle(
                                 color: DropdownsTextColor,
@@ -747,6 +780,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
                   // Faculty Dropdown
                   Container(
+                    height: DropdownsBFHeight,
                     width: DropdownsBFWidth,
                     decoration: BoxDecoration(
                       color: LandingPageBrightYellow, // Set the background color
@@ -754,7 +788,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                     ),
                     child: Center(
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(24, 0, 4, 0),
+                        padding: EdgeInsets.fromLTRB(19, 0, 4, 0),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             isExpanded: true,
@@ -793,7 +827,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                             },
                             value: selectedFaculty,
                             icon: Icon(Icons.arrow_downward, color: DropdownsTextColor), // Custom icon
-                            iconSize: 20, // Set icon size
+                            iconSize: 15, // Set icon size
                             elevation: 0, // Dropdown menu elevation
                             style: TextStyle(
                               color: DropdownsTextColor,
@@ -919,8 +953,8 @@ class _TimeTablePageState extends State<TimeTablePage> {
                                                             });
                                                           } else if (editButtonPressed) {
                                                             selectedDay = ContainersToPrint[containerNumber].dayString;
-                                                            selectedStartTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].startTimeString);
-                                                            selectedEndTimeInDialogBox = convertTimeToAMPM(ContainersToPrint[containerNumber].endTimeString);
+                                                            selectedStartTimeInDialogBox.time = convertTimeToAMPM(ContainersToPrint[containerNumber].startTimeString);
+                                                            selectedEndTimeInDialogBox.time = convertTimeToAMPM(ContainersToPrint[containerNumber].endTimeString);
                                                             enteredCourse = ContainersToPrint[containerNumber].course;
                                                             enteredVenue = ContainersToPrint[containerNumber].venue;
                                                             enteredNotes = ContainersToPrint[containerNumber].notes;
@@ -1031,17 +1065,12 @@ class _TimeTablePageState extends State<TimeTablePage> {
                       // ),
                     ),
                     onPressed: () async {
+                      if (deleteButtonPressed || editButtonPressed) return;
                       setState(() {
-                        if (deleteButtonPressed || editButtonPressed) {
-                        } else {
-                          addButtonPressed = !addButtonPressed;
-                          if (addButtonPressed) {
-                            print("Add button unpressed");
-                            addButtonPressed = false;
-                          }
-                        }
+                        addButtonPressed = !addButtonPressed;
                       });
                       showEditDialog(context, -1);
+                      addButtonPressed = false;
                     },
                     child: Text(
                       addButtonPressed ? "Cancel" : "Add",
