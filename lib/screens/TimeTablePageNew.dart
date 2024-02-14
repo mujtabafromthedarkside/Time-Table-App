@@ -741,7 +741,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
       drawer: SideBar(),
       appBar: AppBar(
         backgroundColor: LandingPageDarkBlue,
-        title: const Text("Time Table App"),
+        title: Text("Time Table App", style: TextStyle(color: AppBarTextColor),),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppBarTextColor),
@@ -757,18 +757,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
         ),
         actions: [
           Padding(
-            padding:  EdgeInsets.only(right: 8.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                backgroundColor: addButtonPressed ? Colors.red : Colors.blue,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              onPressed: () {
+            padding:  EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -779,8 +770,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
               child: Text(
                 "Login",
                 style: TextStyle(
-                  fontSize: 15,
-                  fontFamily: 'Roboto',
+                    fontSize: 15,
+                    fontFamily: 'Roboto',
+                    color: Colors.grey
                 ),
               ),
             ),

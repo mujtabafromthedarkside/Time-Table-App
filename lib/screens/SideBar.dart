@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:timetable/config/strings.dart';
 import 'package:timetable/screens/LandingPage.dart';
 
 class SideBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Color(0xffA7D5FF),
+      backgroundColor: LandingPageDarkBlue,
       child: ListView(
         children: [
           ListTile(
-            leading: Icon(Icons.people_alt),
-            title: Text("About Us"),
+            leading: Icon(Icons.people_alt, color: Colors.white,),
+            title: Text("About Us", style: TextStyle(color: Colors.white),),
             onTap: (){
               Navigator.push(context, MaterialPageRoute(builder: (context){
                 return LandingPage(); //Profile()
@@ -18,8 +19,8 @@ class SideBar extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.policy),
-            title: Text("Privacy Policy"),
+            leading: Icon(Icons.policy, color: Colors.white,),
+            title: Text("Privacy Policy", style: TextStyle(color: Colors.white)),
             onTap: (){},
           ),
         ],
