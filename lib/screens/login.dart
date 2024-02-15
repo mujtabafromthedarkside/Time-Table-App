@@ -101,7 +101,12 @@ class _LoginState extends State<Login>{
                         SizedBox(height: 60),
                         ElevatedButton(
                           onPressed: () {
-
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TimeTablePage(),
+                              ),
+                            );
                           },
                           child: Text('login', style: TextStyle(fontSize: 24, color: Colors.white), ),
                           style: ElevatedButton.styleFrom(
