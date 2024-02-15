@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:timetable/config/config.dart';
-import 'package:timetable/screens/login.dart';
+import 'package:timetable/screens/Login.dart';
 
 import '../config/API_funcs.dart';
-import 'TimeTablePageNew.dart';
+import 'timetable/TimeTablePageNew.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -33,7 +33,7 @@ class LandingPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30)
                   ),
-                  backgroundColor: Color(0xFF357C93),
+                  backgroundColor: Color(0xFFE9A21A),
                   padding: EdgeInsets.only(left: 50, top: 12, right: 50, bottom: 12),
                 ),
               ),
@@ -46,8 +46,8 @@ class LandingPage extends StatelessWidget {
 
   Future<void> fetchData(BuildContext context) async {
     try {
-      // String url = URL + "add_timetable";
-      // print(url);
+      String url = URL + "add_timetable";
+      print(url);
       // final dataToSend = {"faculty": "AI31",
       //   "day": "friday",
       //   "color": "#FF5733",
