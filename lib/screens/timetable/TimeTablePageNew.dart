@@ -656,18 +656,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 8.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                backgroundColor: addButtonPressed ? Colors.red : Colors.blue,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              onPressed: () {
+            padding: EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -677,10 +668,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
               },
               child: Text(
                 "Login",
-                style: TextStyle(
-                  fontSize: 15,
-                  fontFamily: 'Roboto',
-                ),
+                style: TextStyle(fontSize: 15, fontFamily: 'Roboto', color: Colors.grey),
               ),
             ),
           ),
