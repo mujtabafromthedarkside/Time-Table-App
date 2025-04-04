@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';   // Color
-import 'dart:math';                       // Random
+import 'package:flutter/material.dart'; // Color
+import 'dart:math'; // Random
 import 'package:timetable/screens/timetable/TimetableSlot.dart';
-import 'package:timetable/config/strings.dart';
+import 'package:timetable/config/constants.dart';
 
 // COLORS
 Color getRandomColor() {

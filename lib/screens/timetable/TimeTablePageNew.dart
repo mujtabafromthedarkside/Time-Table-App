@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import 'package:timetable/config/API_funcs.dart';
-import 'package:timetable/config/config.dart';
-import 'package:timetable/config/strings.dart';
+import 'package:timetable/config/constants.dart';
 
 import 'package:timetable/screens/login.dart';
 import 'package:timetable/screens/LandingPage.dart';
@@ -635,6 +634,9 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    DayAxisUnitLength = (screenWidth - TimeAxisBreadth) / 5;
+
     return Scaffold(
       backgroundColor: LandingPageDarkBlue,
       drawer: SideBar(),
@@ -659,6 +661,14 @@ class _TimeTablePageState extends State<TimeTablePage> {
             padding: EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
+                if (loggedIn) {
+                  setState(() {
+                    loggedIn = false;
+                  });
+
+                  return;
+                }
+
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -667,7 +677,7 @@ class _TimeTablePageState extends State<TimeTablePage> {
                 );
               },
               child: Text(
-                "Login",
+                loggedIn ? "Logout" : "Login",
                 style: TextStyle(fontSize: 15, fontFamily: 'Roboto', color: Colors.grey),
               ),
             ),
@@ -1029,124 +1039,126 @@ class _TimeTablePageState extends State<TimeTablePage> {
             ),
 
             // Edit buttons row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Add Button
-                Container(
-                  // color: Colors.red,
-                  width: ButtonsWidth,
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                  // decoration: BoxDecoration(
-                  // color: addButtonPressed ? Colors.red : EditButtonsColor,
-                  // borderRadius: BorderRadius.circular(30), // Adjust the radius
-                  // border: Border.all(width: 0, color: Colors.transparent),
-                  // ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: addButtonPressed ? CancelColor : EditButtonsColor,
-                      // foregroundColor: Colors.black,
-                      // shape: RoundedRectangleBorder(
-                      //   borderRadius: BorderRadius.circular(30),
-                      // ),
-                    ),
-                    onPressed: () async {
-                      if (deleteButtonPressed || editButtonPressed) return;
-                      setState(() {
-                        addButtonPressed = !addButtonPressed;
-                      });
-                      showEditDialog(context, -1);
-                      addButtonPressed = false;
-                    },
-                    child: Text(
-                      addButtonPressed ? "Cancel" : "Add",
-                      style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
-                    ),
-                  ),
-                ),
-
-                // Edit Button
-                Container(
-                  // color: Colors.red,
-                  width: ButtonsWidth,
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                  // decoration: BoxDecoration(
-                  // color: editButtonPressed ? Colors.red : EditButtonsColor,
-                  // borderRadius: BorderRadius.circular(30), // Adjust the radius
-                  // border: Border.all(width: 0, color: Colors.transparent),
-                  // ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: editButtonPressed ? CancelColor : EditButtonsColor,
-                      // foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+            loggedIn == false
+                ? Container()
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Add Button
+                      Container(
+                        // color: Colors.red,
+                        width: ButtonsWidth,
+                        margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                        // decoration: BoxDecoration(
+                        // color: addButtonPressed ? Colors.red : EditButtonsColor,
+                        // borderRadius: BorderRadius.circular(30), // Adjust the radius
+                        // border: Border.all(width: 0, color: Colors.transparent),
+                        // ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            backgroundColor: addButtonPressed ? CancelColor : EditButtonsColor,
+                            // foregroundColor: Colors.black,
+                            // shape: RoundedRectangleBorder(
+                            //   borderRadius: BorderRadius.circular(30),
+                            // ),
+                          ),
+                          onPressed: () async {
+                            if (deleteButtonPressed || editButtonPressed) return;
+                            setState(() {
+                              addButtonPressed = !addButtonPressed;
+                            });
+                            showEditDialog(context, -1);
+                            addButtonPressed = false;
+                          },
+                          child: Text(
+                            addButtonPressed ? "Cancel" : "Add",
+                            style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
+                          ),
+                        ),
                       ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (deleteButtonPressed || addButtonPressed) {
-                        } else {
-                          editButtonPressed = !editButtonPressed;
-                          if (editButtonPressed) {
-                            ButtonPrompt = editButtonPrompt;
-                          } else {
-                            ButtonPrompt = defaultButtonPrompt;
-                          }
-                        }
-                      });
-                    },
-                    child: Text(
-                      editButtonPressed ? "Cancel" : "Edit",
-                      style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
-                    ),
-                  ),
-                ),
 
-                // Delete Button
-                Container(
-                  // color: Colors.red,
-                  width: ButtonsWidth,
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                  // decoration: BoxDecoration(
-                  //   color: deleteButtonPressed ? Colors.red : EditButtonsColor,
-                  //   borderRadius: BorderRadius.circular(30), // Adjust the radius
-                  // ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      backgroundColor: deleteButtonPressed ? CancelColor : EditButtonsColor,
-                      // foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                      // Edit Button
+                      Container(
+                        // color: Colors.red,
+                        width: ButtonsWidth,
+                        margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                        // decoration: BoxDecoration(
+                        // color: editButtonPressed ? Colors.red : EditButtonsColor,
+                        // borderRadius: BorderRadius.circular(30), // Adjust the radius
+                        // border: Border.all(width: 0, color: Colors.transparent),
+                        // ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            backgroundColor: editButtonPressed ? CancelColor : EditButtonsColor,
+                            // foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (deleteButtonPressed || addButtonPressed) {
+                              } else {
+                                editButtonPressed = !editButtonPressed;
+                                if (editButtonPressed) {
+                                  ButtonPrompt = editButtonPrompt;
+                                } else {
+                                  ButtonPrompt = defaultButtonPrompt;
+                                }
+                              }
+                            });
+                          },
+                          child: Text(
+                            editButtonPressed ? "Cancel" : "Edit",
+                            style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
+                          ),
+                        ),
                       ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (addButtonPressed || editButtonPressed) {
-                        } else {
-                          deleteButtonPressed = !deleteButtonPressed;
-                          if (deleteButtonPressed) {
-                            ButtonPrompt = deleteButtonPrompt;
-                          } else {
-                            ButtonPrompt = defaultButtonPrompt;
-                          }
-                        }
-                      });
-                    },
-                    child: Text(
-                      deleteButtonPressed ? "Cancel" : "Delete",
-                      style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
-                    ),
+
+                      // Delete Button
+                      Container(
+                        // color: Colors.red,
+                        width: ButtonsWidth,
+                        margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                        // decoration: BoxDecoration(
+                        //   color: deleteButtonPressed ? Colors.red : EditButtonsColor,
+                        //   borderRadius: BorderRadius.circular(30), // Adjust the radius
+                        // ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            // padding: EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            backgroundColor: deleteButtonPressed ? CancelColor : EditButtonsColor,
+                            // foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (addButtonPressed || editButtonPressed) {
+                              } else {
+                                deleteButtonPressed = !deleteButtonPressed;
+                                if (deleteButtonPressed) {
+                                  ButtonPrompt = deleteButtonPrompt;
+                                } else {
+                                  ButtonPrompt = defaultButtonPrompt;
+                                }
+                              }
+                            });
+                          },
+                          child: Text(
+                            deleteButtonPressed ? "Cancel" : "Delete",
+                            style: TextStyle(fontSize: 16, fontFamily: 'Roboto', fontWeight: FontWeight.normal, color: ButtonsTextColor),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

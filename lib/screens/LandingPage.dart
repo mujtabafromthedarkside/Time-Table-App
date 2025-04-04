@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timetable/config/config.dart';
-import 'package:timetable/screens/Login.dart';
-
-import '../config/API_funcs.dart';
+import 'package:timetable/config/constants.dart';
 import 'timetable/TimeTablePageNew.dart';
 
 class LandingPage extends StatelessWidget {

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:timetable/screens/TimeTablePageOld.dart';
 import 'package:timetable/screens/timetable/TimeTablePageNew.dart';
-import 'dart:convert';
-import '../config/config.dart';
-
+import '../config/constants.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -12,13 +10,13 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login>{
+class _LoginState extends State<Login> {
   final _formfield = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passController = TextEditingController();
   bool passToggle = true;
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         height: double.infinity,
@@ -66,8 +64,8 @@ class _LoginState extends State<Login>{
                             filled: true,
                             fillColor: Color(0xffE9E9E9),
                           ),
-                          validator: (value){
-                            if(value!.isEmpty){
+                          validator: (value) {
+                            if (value!.isEmpty) {
                               return "Enter email";
                             }
                           },
@@ -84,16 +82,15 @@ class _LoginState extends State<Login>{
                               fillColor: Color(0xffE9E9E9),
                               prefixIcon: Icon(Icons.lock),
                               suffixIcon: InkWell(
-                                onTap: (){
+                                onTap: () {
                                   setState(() {
                                     passToggle = !passToggle;
                                   });
                                 },
                                 child: Icon(passToggle ? Icons.visibility : Icons.visibility_off),
-                              )
-                          ),
-                          validator: (value){
-                            if(value!.isEmpty){
+                              )),
+                          validator: (value) {
+                            if (value!.isEmpty) {
                               return "Enter password";
                             }
                           },
@@ -103,30 +100,29 @@ class _LoginState extends State<Login>{
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => TimeTablePage(),
-                              ),
+                              MaterialPageRoute(builder: (context) {
+                                loggedIn = true;
+                                return TimeTablePage();
+                              }),
                             );
                           },
-                          child: Text('login', style: TextStyle(fontSize: 24, color: Colors.white), ),
+                          child: Text(
+                            'login',
+                            style: TextStyle(fontSize: 24, color: Colors.white),
+                          ),
                           style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             backgroundColor: Color(0xFFE9A21A),
                             padding: EdgeInsets.only(left: 50, top: 12, right: 50, bottom: 12),
                           ),
                         ),
                       ],
-                    )
-                ),
+                    )),
               ),
             ],
           ),
         ),
       ),
     );
-
   }
-
 }

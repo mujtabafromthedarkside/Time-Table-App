@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+// URL
+String URL = "https://timetablebackend.vercel.app/";
+// String URL = "https://timetablebackend-d17x547i7-mujtabafromthedarksides-projects.vercel.app/";
+
 // STRINGS
 String TimeAxisStartTimeString = "08:00";
 String TimeAxisEndTimeString = "17:30";
@@ -14,6 +18,7 @@ String editButtonPrompt = "Click a slot to EDIT";
 String deleteButtonPrompt = "Click a slot to DELETE";
 
 // COLORS
+Color backgroundColor = Color(0xFF0E2954);
 Color LandingPageBrightYellow = Color(0xFFE9A21A);
 Color LandingPageLightBlue = Color(0xFF357C93);
 Color LandingPageDarkBlue = Color(0xFF0E2954);
@@ -52,3 +57,6 @@ double TimeAxisBreadth = 60;
 double DayAxisBreadth = 65;
 
 double TimeAxisUnitTime = 30;
+
+// OTHERS
+bool loggedIn = false;

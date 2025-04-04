@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timetable/config/strings.dart';
+import 'package:timetable/config/constants.dart';
 
 class TimetableSlot {
   late int startTime;
@@ -75,4 +75,3 @@ class TimetableSlot {
     this.calculateLength();
   }
 }
-
